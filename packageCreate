@@ -1,0 +1,1131 @@
+#!/usr/bin/perl  -- -*-perl-*-
+##
+## Parameters
+##
+
+$i=0;
+$nDep = 0;
+$package = 0;
+
+while ($i<$#ARGV+1) {
+  if ($ARGV[$i] eq "-d") {
+    $i++;
+    if ($i<$#ARGV+1) {
+      $dep[$nDep] = $ARGV[$i];
+      $nDep++;
+      $i++;
+    } else {
+      die "Usage: packageCreate <packageName> -d package PACKAGE \n";
+    }
+    if ($i<$#ARGV+1) {
+      $DEP[$nDep-1] = $ARGV[$i];
+      $i++;
+    } else {
+      die "Usage: packageCreate <packageName> -d package PACKAGE \n";
+    }
+  }
+  else {
+    if (!$package) {
+      $package = $ARGV[$i];
+      $i++;
+    } else {
+      die "Usage: packageCreate <packageName> -d package PACKAGE \n";
+    }
+  }
+}
+
+if (!$package) {
+  die "Usage: packageCreate <packageName> -d package PACKAGE \n";
+}
+
+print "Number of dependences: $nDep \n";
+
+for ($i=0; $i<$nDep; $i++) {
+  print "  dependence $i: $dep[$i] $DEP[$i]\n";
+}
+print "package name: $package\n";
+
+mkdir "$package";
+mkdir "$package/include";
+mkdir "$package/include/$package";
+mkdir "$package/src";
+mkdir "$package/doc";
+mkdir "$package/doc/additionalDoc";
+mkdir "$package/doc/figures";
+mkdir "$package/doc/pictures";
+mkdir "$package/unitTesting";
+
+#
+#  configure.ac
+#
+
+open(OUTPUT, ">"."$package/configure.ac") or
+  die "Cannot open output file $package/configure.ac \n";
+
+print OUTPUT "\n";
+print OUTPUT "dnl \n";
+print OUTPUT "dnl configure.ac file for package $package \n";
+print OUTPUT "dnl\n";
+print OUTPUT "\n";
+print OUTPUT "AC_INIT([$package], [1.0], [support\@company.com])\n";
+print OUTPUT "AC_PREREQ(2.59)\n";
+print OUTPUT "\n";
+print OUTPUT "AM_INIT_AUTOMAKE([no-define])\n";
+print OUTPUT "\n";
+print OUTPUT "AC_PROG_CXX\n";
+print OUTPUT "AC_PROG_INSTALL\n";
+print OUTPUT "AC_PROG_LIBTOOL\n";
+print OUTPUT "\n";
+for ($iDep=0; $iDep<$nDep; $iDep++) {
+  print OUTPUT "PKG_CHECK_MODULES($DEP[$iDep], $dep[$iDep])\n";
+  print OUTPUT "$DEP[$iDep]_PREFIX=\`\$PKG_CONFIG $dep[$iDep] --variable=prefix\`\n";
+  print OUTPUT "AC_SUBST($DEP[$iDep]_CFLAGS)\n";
+  print OUTPUT "AC_SUBST($DEP[$iDep]_LIBS)\n";
+  print OUTPUT "AC_SUBST($DEP[$iDep]_PREFIX)\n";
+  print OUTPUT "\n"
+}
+print OUTPUT "AC_OUTPUT(\n";
+print OUTPUT "	$package.pc\n";
+print OUTPUT "	Makefile\n";
+print OUTPUT "	include/Makefile\n";
+print OUTPUT "	src/Makefile\n";
+print OUTPUT "	doc/Makefile\n";
+print OUTPUT "	doc/package.dox\n";
+print OUTPUT "	unitTesting/Makefile\n";
+print OUTPUT "	)\n";
+
+close(OUTPUT);
+
+#
+#  package.pc.in
+#
+
+open(OUTPUT, ">"."$package\/$package".".pc.in") or
+  die "Cannot open output file $package/ \n";
+
+print OUTPUT "prefix=\@prefix\@\n";
+print OUTPUT "exec_prefix=\@exec_prefix\@\n";
+print OUTPUT "libdir=\@libdir\@\n";
+print OUTPUT "includedir=\@includedir\@\n";
+print OUTPUT "datarootdir=\@datarootdir\@\n";
+print OUTPUT "docdir=\@datadir\@/doc/\@PACKAGE_NAME\@\n";
+print OUTPUT "\n";
+print OUTPUT "Name: \@PACKAGE\@\n";
+print OUTPUT "Description: \n";
+print OUTPUT "Version: \@VERSION\@\n";
+print OUTPUT "Requires: ";
+for ($iDep=0; $iDep<$nDep-1; $iDep++) {
+  print OUTPUT "$dep[$iDep],";
+}
+if ($nDep >= 1) {
+  $iDep = $nDep-1;
+  print OUTPUT "$dep[$iDep]";
+}
+print OUTPUT "\n";
+print OUTPUT "Libs: ";
+print OUTPUT "-L\${libdir} -l$package\n";
+print OUTPUT "Cflags: -I\${includedir}\n";
+
+close(OUTPUT);
+
+#
+#  Makefile.am
+#
+
+open(OUTPUT, ">"."$package/Makefile.am") or
+  die "Cannot open output file $package/Makefile.am \n";
+
+
+print OUTPUT "# \n";
+print OUTPUT "#  Copyright \n";
+print OUTPUT "# \n";
+print OUTPUT "\n";
+print OUTPUT "SUBDIRS = \\\n";
+print OUTPUT "\t"."src \\\n";
+print OUTPUT "\t"."include \\\n";
+print OUTPUT "\t"."doc \\\n";
+print OUTPUT "\t"."unitTesting\n";
+print OUTPUT "\n";
+print OUTPUT "$package"."dir = \$(libdir)/pkgconfig\n";
+print OUTPUT "$package"."_DATA = $package.pc\n";
+print OUTPUT "\n";
+print OUTPUT "install-data-hook: documentation\n";
+print OUTPUT "\n";
+print OUTPUT "documentation:\n";
+print OUTPUT "\t"."cd doc; \$(MAKE) install\n";
+
+close(OUTPUT);
+
+#
+#  Makefile.am
+#
+
+open(OUTPUT, ">"."$package/autogen.sh") or
+  die "Cannot open output file $package/autogen.sh \n";
+
+print OUTPUT "#!/bin/sh \n";
+print OUTPUT "aclocal \n";
+print OUTPUT "libtoolize -c \n";
+print OUTPUT "automake -ca \n";
+print OUTPUT "autoconf \n";
+
+close(OUTPUT);
+system "chmod 775 $package/autogen.sh";
+
+#
+#  include/Makefile.am
+#
+
+open(OUTPUT, ">"."$package\/include\/Makefile.am") or
+  die "Cannot open output file $package\/include\/$package\/Makefile.am \n";
+
+print OUTPUT "# \n";
+print OUTPUT "#  Copyright \n";
+print OUTPUT "# \n";
+print OUTPUT "\n";
+print OUTPUT "$package"."dir = \@includedir\@/$package\n";
+print OUTPUT "$package"."_HEADERS = \\\n";
+print OUTPUT "\t"."$package/$package.h\n";
+
+close(OUTPUT);
+
+#
+#  src/Makefile.am
+#
+
+open(OUTPUT, ">"."$package\/src\/Makefile.am") or
+  die "Cannot open output file $package\/src\/Makefile.am \n";
+
+print OUTPUT "# \n";
+print OUTPUT "#  Copyright \n";
+print OUTPUT "# \n";
+print OUTPUT "\n";
+print OUTPUT "lib_LTLIBRARIES = lib$package".".la\n";
+print OUTPUT "lib$package"."_la_SOURCES = \\\n";
+print OUTPUT "\t$package".".cpp\n";
+print OUTPUT "\n";
+print OUTPUT "lib$package"."_la_LDFLAGS = ";
+for ($iDep=0; $iDep<$nDep; $iDep++) {
+  print OUTPUT "\\\n";
+  print OUTPUT "\t"."\$($DEP[$iDep]_LIBS)\$ ";
+}
+print OUTPUT "\\\n";
+print OUTPUT "\t"."-release \$(PACKAGE_VERSION)";
+print OUTPUT "\n";
+print OUTPUT "\n";
+print OUTPUT "lib$package"."_la_CPPFLAGS = \\\n";
+print OUTPUT "\t"."-I\$(top_srcdir)/include";
+for ($iDep=0; $iDep<$nDep; $iDep++) {
+  print OUTPUT " \\\n";
+  print OUTPUT "\t"."\$($DEP[$iDep]_CFLAGS)\$";
+}
+
+close(OUTPUT);
+
+#
+#  doc/Makefile.am
+#
+
+open(OUTPUT, ">"."$package\/doc\/Makefile.am") or
+  die "Cannot open output file $package\/doc\/Makefile.am \n";
+
+
+print OUTPUT "# \n";
+print OUTPUT "#  Copyright \n";
+print OUTPUT "# \n";
+print OUTPUT "\n";
+print OUTPUT "\n";
+print OUTPUT "$package"."dir = \$(datadir)/doc/$package\n";
+print OUTPUT "\n";
+print OUTPUT "EXTRA_DIST = \\\n";
+print OUTPUT "\t"."header.html \\\n";
+print OUTPUT "\t"."footer.html \\\n";
+print OUTPUT "\t"."package.css \\\n";
+print OUTPUT "\t"."pictures\/footer.jpg \\\n";
+print OUTPUT "\t"."additionalDoc/package.h \n";
+print OUTPUT "\n";
+print OUTPUT "\n";
+print OUTPUT "install:html-doc \n";
+print OUTPUT "\t"."mkdir -p \$($package"."dir)\n";
+print OUTPUT "\t"."\$(INSTALL_DATA) html/\* \$($package"."dir)\n";
+print OUTPUT "\t"."mkdir -p \$($package"."dir)/pictures\n";
+print OUTPUT "\t"."\$(INSTALL_DATA) \$(srcdir)/pictures/\* \$($package"."dir)/pictures\n";
+print OUTPUT "\t"."mkdir -p \$(datadir)/doc/doxytag\n";
+print OUTPUT "\t"."\$(INSTALL_DATA) $package.doxytag \$(datadir)/doc/doxytag\n";
+print OUTPUT "\n";
+print OUTPUT "html-doc: package.dox\n";
+print OUTPUT "	doxygen \$<\n";
+
+close(OUTPUT);
+
+#
+#  doc/package.dox.in
+#
+
+open(OUTPUT, ">"."$package\/doc\/package.dox.in") or
+  die "Cannot open output file $package\/doc\/package.dox.in \n";
+
+print OUTPUT "# Doxyfile 1.4.2\n";
+print OUTPUT "\n";
+print OUTPUT "\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# Project related configuration options\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "OUTPUT_DIRECTORY       = .\n";
+print OUTPUT "CREATE_SUBDIRS         = NO\n";
+print OUTPUT "OUTPUT_LANGUAGE        = English\n";
+print OUTPUT "USE_WINDOWS_ENCODING   = YES\n";
+print OUTPUT "BRIEF_MEMBER_DESC      = YES\n";
+print OUTPUT "REPEAT_BRIEF           = YES\n";
+print OUTPUT "ABBREVIATE_BRIEF       = \"The \$name class\" \\\n";
+print OUTPUT "                         \"The \$name widget\" \\\n";
+print OUTPUT "                         \"The \$name file\" \\\n";
+print OUTPUT "                         is \\\n";
+print OUTPUT "                         provides \\\n";
+print OUTPUT "                         specifies \\\n";
+print OUTPUT "                         contains \\\n";
+print OUTPUT "                         represents \\\n";
+print OUTPUT "                         a \\\n";
+print OUTPUT "                         an \\\n";
+print OUTPUT "                         the\n";
+print OUTPUT "ALWAYS_DETAILED_SEC    = YES\n";
+print OUTPUT "INLINE_INHERITED_MEMB  = NO\n";
+print OUTPUT "FULL_PATH_NAMES        = NO\n";
+print OUTPUT "STRIP_FROM_PATH        = \n";
+print OUTPUT "STRIP_FROM_INC_PATH    = \n";
+print OUTPUT "SHORT_NAMES            = NO\n";
+print OUTPUT "JAVADOC_AUTOBRIEF      = YES\n";
+print OUTPUT "MULTILINE_CPP_IS_BRIEF = NO\n";
+print OUTPUT "DETAILS_AT_TOP         = YES\n";
+print OUTPUT "INHERIT_DOCS           = YES\n";
+print OUTPUT "DISTRIBUTE_GROUP_DOC   = NO\n";
+print OUTPUT "SEPARATE_MEMBER_PAGES  = NO\n";
+print OUTPUT "TAB_SIZE               = 2\n";
+print OUTPUT "OPTIMIZE_OUTPUT_FOR_C  = NO\n";
+print OUTPUT "OPTIMIZE_OUTPUT_JAVA   = NO\n";
+print OUTPUT "SUBGROUPING            = YES\n";
+print OUTPUT "\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# Build related configuration options\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "EXTRACT_LOCAL_CLASSES  = YES\n";
+print OUTPUT "EXTRACT_LOCAL_METHODS  = NO\n";
+print OUTPUT "CASE_SENSE_NAMES       = NO\n";
+print OUTPUT "HIDE_SCOPE_NAMES       = NO\n";
+print OUTPUT "SHOW_INCLUDE_FILES     = NO\n";
+print OUTPUT "INLINE_INFO            = YES\n";
+print OUTPUT "SORT_MEMBER_DOCS       = YES\n";
+print OUTPUT "SORT_BRIEF_DOCS        = NO\n";
+print OUTPUT "SORT_BY_SCOPE_NAME     = NO\n";
+print OUTPUT "MAX_INITIALIZER_LINES  = 30\n";
+print OUTPUT "FILE_VERSION_FILTER    = \n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to warning and progress messages\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "QUIET                  = NO\n";
+print OUTPUT "WARNINGS               = YES\n";
+print OUTPUT "WARN_IF_UNDOCUMENTED   = YES\n";
+print OUTPUT "WARN_IF_DOC_ERROR      = YES\n";
+print OUTPUT "WARN_NO_PARAMDOC       = NO\n";
+print OUTPUT "WARN_FORMAT            = \"\$file:\$line: \$text\"\n";
+print OUTPUT "WARN_LOGFILE           = \n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the input files\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "RECURSIVE              = YES\n";
+print OUTPUT "EXCLUDE                = \n";
+print OUTPUT "EXCLUDE_SYMLINKS       = NO\n";
+print OUTPUT "EXAMPLE_PATH           = \n";
+print OUTPUT "EXAMPLE_PATTERNS       = \*\n";
+print OUTPUT "EXAMPLE_RECURSIVE      = NO\n";
+print OUTPUT "INPUT_FILTER           = \n";
+print OUTPUT "FILTER_PATTERNS        = \n";
+print OUTPUT "FILTER_SOURCE_FILES    = NO\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to source browsing\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the alphabetical class index\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "ALPHABETICAL_INDEX     = NO\n";
+print OUTPUT "COLS_IN_ALPHA_INDEX    = 5\n";
+print OUTPUT "IGNORE_PREFIX          = \n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the HTML output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "GENERATE_HTML          = YES\n";
+print OUTPUT "HTML_FILE_EXTENSION    = .html\n";
+print OUTPUT "HTML_ALIGN_MEMBERS     = YES\n";
+print OUTPUT "GENERATE_HTMLHELP      = NO\n";
+print OUTPUT "CHM_FILE               = \n";
+print OUTPUT "HHC_LOCATION           = \n";
+print OUTPUT "GENERATE_CHI           = NO\n";
+print OUTPUT "BINARY_TOC             = NO\n";
+print OUTPUT "TOC_EXPAND             = YES\n";
+print OUTPUT "DISABLE_INDEX          = NO\n";
+print OUTPUT "ENUM_VALUES_PER_LINE   = 1\n";
+print OUTPUT "GENERATE_TREEVIEW      = YES\n";
+print OUTPUT "TREEVIEW_WIDTH         = 250\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the LaTeX output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "LATEX_OUTPUT           = latex\n";
+print OUTPUT "LATEX_CMD_NAME         = latex\n";
+print OUTPUT "MAKEINDEX_CMD_NAME     = makeindex\n";
+print OUTPUT "COMPACT_LATEX          = NO\n";
+print OUTPUT "PAPER_TYPE             = a4wide\n";
+print OUTPUT "EXTRA_PACKAGES         = \n";
+print OUTPUT "LATEX_HEADER           = \n";
+print OUTPUT "PDF_HYPERLINKS         = NO\n";
+print OUTPUT "USE_PDFLATEX           = NO\n";
+print OUTPUT "LATEX_BATCHMODE        = NO\n";
+print OUTPUT "LATEX_HIDE_INDICES     = NO\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the RTF output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "RTF_OUTPUT             = rtf\n";
+print OUTPUT "COMPACT_RTF            = NO\n";
+print OUTPUT "RTF_HYPERLINKS         = NO\n";
+print OUTPUT "RTF_STYLESHEET_FILE    = \n";
+print OUTPUT "RTF_EXTENSIONS_FILE    = \n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the man page output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "MAN_OUTPUT             = man\n";
+print OUTPUT "MAN_EXTENSION          = .3\n";
+print OUTPUT "MAN_LINKS              = NO\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the XML output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "XML_OUTPUT             = xml\n";
+print OUTPUT "XML_SCHEMA             = \n";
+print OUTPUT "XML_DTD                = \n";
+print OUTPUT "XML_PROGRAMLISTING     = YES\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options for the AutoGen Definitions output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "GENERATE_AUTOGEN_DEF   = NO\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the Perl module output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "PERLMOD_LATEX          = NO\n";
+print OUTPUT "PERLMOD_PRETTY         = YES\n";
+print OUTPUT "PERLMOD_MAKEVAR_PREFIX = \n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# Configuration options related to the preprocessor   \n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "ENABLE_PREPROCESSING   = YES\n";
+print OUTPUT "MACRO_EXPANSION        = YES\n";
+print OUTPUT "EXPAND_ONLY_PREDEF     = YES\n";
+print OUTPUT "SEARCH_INCLUDES        = YES\n";
+print OUTPUT "INCLUDE_PATH           = \n";
+print OUTPUT "INCLUDE_FILE_PATTERNS  = \n";
+print OUTPUT "EXPAND_AS_DEFINED      = \n";
+print OUTPUT "SKIP_FUNCTION_MACROS   = YES\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# Configuration::additions related to external references   \n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "TAGFILES               = \\\n";
+for ($iDep=0; $iDep<$nDep; $iDep++) {
+  print OUTPUT "\t"."\@$DEP[$iDep]_PREFIX\@/share/doc/doxytag/$dep[$iDep].doxytag=\@$DEP[$iDep]_PREFIX\@/share/doc/$dep[$iDep] \\\n";
+}
+print OUTPUT "\n";
+print OUTPUT "GENERATE_TAGFILE       = $package.doxytag\n";
+print OUTPUT "ALLEXTERNALS           = NO\n";
+print OUTPUT "EXTERNAL_GROUPS        = YES\n";
+print OUTPUT "PERL_PATH              = \/usr\/bin\/perl\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# Configuration options related to the dot tool   \n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# Configuration::additions related to the search engine   \n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "SEARCHENGINE           = NO\n";
+print OUTPUT "\n";
+print OUTPUT "\n";
+print OUTPUT "\n";
+print OUTPUT "\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# Project related configuration options\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "PROJECT_NAME           = \"$package library documentation\"\n";
+print OUTPUT "PROJECT_NUMBER         = \@VERSION\@\n";
+print OUTPUT "\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# Build related configuration options\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "EXTRACT_ALL            = YES\n";
+print OUTPUT "EXTRACT_PRIVATE        = YES\n";
+print OUTPUT "EXTRACT_STATIC         = NO\n";
+print OUTPUT "HIDE_UNDOC_MEMBERS     = YES\n";
+print OUTPUT "HIDE_UNDOC_CLASSES     = YES\n";
+print OUTPUT "HIDE_FRIEND_COMPOUNDS  = YES\n";
+print OUTPUT "HIDE_IN_BODY_DOCS      = NO\n";
+print OUTPUT "INTERNAL_DOCS          = NO\n";
+print OUTPUT "SHOW_INCLUDE_FILES     = NO\n";
+print OUTPUT "GENERATE_TODOLIST      = YES\n";
+print OUTPUT "GENERATE_TESTLIST      = NO\n";
+print OUTPUT "GENERATE_BUGLIST       = NO\n";
+print OUTPUT "GENERATE_DEPRECATEDLIST= YES\n";
+print OUTPUT "ENABLED_SECTIONS       = \n";
+print OUTPUT "SHOW_USED_FILES        = NO\n";
+print OUTPUT "SHOW_DIRECTORIES       = NO\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to warning and progress messages\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the input files\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "FILE_PATTERNS          = \*.h \*.idl\n";
+print OUTPUT "EXCLUDE_PATTERNS       = \n";
+print OUTPUT "INPUT                  = \@top_srcdir\@\/include \\\n";
+print OUTPUT "                         \@srcdir\@\/additionalDoc\n";
+print OUTPUT "\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to inserting images\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "IMAGE_PATH = \@top_srcdir\@\/doc\/figures\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to source browsing\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "SOURCE_BROWSER         = NO\n";
+print OUTPUT "INLINE_SOURCES         = NO\n";
+print OUTPUT "STRIP_CODE_COMMENTS    = YES\n";
+print OUTPUT "REFERENCED_BY_RELATION = NO\n";
+print OUTPUT "REFERENCES_RELATION    = NO\n";
+print OUTPUT "VERBATIM_HEADERS       = NO\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the alphabetical class index\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the HTML output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "HTML_OUTPUT            = html\n";
+print OUTPUT "HTML_STYLESHEET        = \@srcdir\@\/package.css\n";
+print OUTPUT "HTML_HEADER            = \@srcdir\@\/header.html\n";
+print OUTPUT "HTML_FOOTER            = \@srcdir\@\/footer.html\n";
+print OUTPUT "\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the LaTeX output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "GENERATE_LATEX         = NO\n";
+print OUTPUT "USE_PDFLATEX           = YES\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the RTF output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "GENERATE_RTF           = NO\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the man page output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "GENERATE_MAN           = NO\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the XML output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "GENERATE_XML           = NO\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options for the AutoGen Definitions output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "GENERATE_AUTOGEN_DEF   = NO\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# configuration options related to the Perl module output\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "GENERATE_PERLMOD       = NO\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# Configuration options related to the preprocessor   \n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# Configuration::additions related to external references   \n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "# Configuration options related to the dot tool   \n";
+print OUTPUT "#---------------------------------------------------------------------------\n";
+print OUTPUT "CLASS_DIAGRAMS         = YES\n";
+print OUTPUT "HIDE_UNDOC_RELATIONS   = YES\n";
+print OUTPUT "HAVE_DOT               = YES\n";
+print OUTPUT "CLASS_GRAPH            = NO\n";
+print OUTPUT "COLLABORATION_GRAPH    = YES\n";
+print OUTPUT "GROUP_GRAPHS           = YES\n";
+print OUTPUT "UML_LOOK               = NO\n";
+print OUTPUT "TEMPLATE_RELATIONS     = NO\n";
+print OUTPUT "INCLUDE_GRAPH          = YES\n";
+print OUTPUT "INCLUDED_BY_GRAPH      = YES\n";
+print OUTPUT "CALL_GRAPH             = NO\n";
+print OUTPUT "GRAPHICAL_HIERARCHY    = YES\n";
+print OUTPUT "DIRECTORY_GRAPH        = YES\n";
+print OUTPUT "DOT_IMAGE_FORMAT       = png\n";
+print OUTPUT "DOT_PATH               = \n";
+print OUTPUT "DOTFILE_DIRS           = \n";
+print OUTPUT "MAX_DOT_GRAPH_WIDTH    = 1024\n";
+print OUTPUT "MAX_DOT_GRAPH_HEIGHT   = 1024\n";
+print OUTPUT "MAX_DOT_GRAPH_DEPTH    = 1000\n";
+print OUTPUT "DOT_TRANSPARENT        = NO\n";
+print OUTPUT "DOT_MULTI_TARGETS      = YES\n";
+print OUTPUT "GENERATE_LEGEND        = YES\n";
+print OUTPUT "DOT_CLEANUP            = YES\n";
+
+close(OUTPUT);
+
+#
+#  doc/package.css
+#
+
+open(OUTPUT, ">"."$package\/doc\/package.css") or
+  die "Cannot open output file $package\/doc\/package.css \n";
+
+print OUTPUT "body {\n";
+print OUTPUT "    font-family: \'Lucida Grande\',\'Lucida Sans Unicode\',Verdana,Sans-Serif;\n";
+print OUTPUT "    color: \#5D5D5D;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "dl {\n";
+print OUTPUT "    border: 1.5px \#82b6d7 solid;\n";
+print OUTPUT "    width: 97%;\n";
+print OUTPUT "    padding: 5px;\n";
+print OUTPUT "    color: \#330077;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "code {\n";
+print OUTPUT "    color: \#3C9A35;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "td.md {\n";
+print OUTPUT "    color: \#0066CC;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "h1 {\n";
+print OUTPUT "    padding-top: 50px;\n";
+print OUTPUT "    padding: 0px;\n";
+print OUTPUT "    font-family: \'Lucida Grande\',\'Lucida Sans Unicode\',Verdana,Sans-Serif;\n";
+print OUTPUT "    font-variant: small-caps;\n";
+print OUTPUT "    color:\#0066CC;\n";
+print OUTPUT "    text-align: center;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "h2,h3,hr {\n";
+print OUTPUT "    magin-top: 15px;\n";
+print OUTPUT "    padding: 0px;\n";
+print OUTPUT "    font-family: \'Lucida Grande\',\'Lucida Sans Unicode\',Verdana,Sans-Serif;\n";
+print OUTPUT "    font-variant: small-caps;\n";
+print OUTPUT "    color:\#0066CC;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "h4 {\n";
+print OUTPUT "    color: \#3C9A35;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "a:link {\n";
+print OUTPUT "    font-weight: bold;\n";
+print OUTPUT "    text-decoration: none;\n";
+print OUTPUT "    color:\#0066CC\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "a:hover, a:active { \n";
+print OUTPUT "	text-decoration: underline; \n";
+print OUTPUT "	color: \#3C9A35;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "a:visited {\n";
+print OUTPUT "    font-weight: bold;\n";
+print OUTPUT "    color: \#3C9A35;\n";
+print OUTPUT "    text-decoration: none;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.memitem\n";
+print OUTPUT "{ \n";
+print OUTPUT "  spacing: 10px;\n";
+print OUTPUT "  width:100%;\n";
+print OUTPUT "  background:\#FFFFFF;\n";
+print OUTPUT "  font-size:100%;\n";
+print OUTPUT "  line-height:normal;\n";
+print OUTPUT "  border-width: 1px;\n";
+print OUTPUT "  border-style: solid;\n";
+print OUTPUT "  border-color: \#808080;\n";
+print OUTPUT "  -moz-border-radius: 8px 8px 8px 8px;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.memproto\n";
+print OUTPUT "{ \n";
+print OUTPUT "  width:100%;\n";
+print OUTPUT "  background:\#F0F0F0;\n";
+print OUTPUT "  font-size:100%;\n";
+print OUTPUT "  line-height:normal;\n";
+print OUTPUT "  border-width: 1px;\n";
+print OUTPUT "  border-style: solid;\n";
+print OUTPUT "  border-color: \#808080;\n";
+print OUTPUT "  -moz-border-radius: 8px 8px 8px 8px;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.memdoc\n";
+print OUTPUT "{ \n";
+print OUTPUT "  padding: 10px;\n";
+print OUTPUT "  width:100%;\n";
+print OUTPUT "  font-size:100%;\n";
+print OUTPUT "  line-height:normal;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs\n";
+print OUTPUT "{\n";
+print OUTPUT "   float            : left;\n";
+print OUTPUT "   width            : 100%;\n";
+print OUTPUT "   background       : url(\"tab_b.gif\") repeat-x bottom;\n";
+print OUTPUT "   margin-bottom    : 4px;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs UL\n";
+print OUTPUT "{\n";
+print OUTPUT "   margin           : 0px;\n";
+print OUTPUT "   padding-left     : 10px;\n";
+print OUTPUT "   list-style       : none;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs LI, DIV.tabs FORM\n";
+print OUTPUT "{\n";
+print OUTPUT "   display          : inline;\n";
+print OUTPUT "   margin           : 0px;\n";
+print OUTPUT "   padding          : 0px;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs FORM\n";
+print OUTPUT "{\n";
+print OUTPUT "   float            : right;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs A\n";
+print OUTPUT "{\n";
+print OUTPUT "   float            : left;\n";
+print OUTPUT "   background       : url(\"tab_r.gif\") no-repeat right top;\n";
+print OUTPUT "   border-bottom    : 1px solid \#84B0C7;\n";
+print OUTPUT "   font-size        : x-small;\n";
+print OUTPUT "   font-weight      : bold;\n";
+print OUTPUT "   text-decoration  : none;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs A:hover\n";
+print OUTPUT "{\n";
+print OUTPUT "   background-position: 100% -150px;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs A:link, DIV.tabs A:visited,\n";
+print OUTPUT "DIV.tabs A:active, DIV.tabs A:hover\n";
+print OUTPUT "{\n";
+print OUTPUT "       color: \#1A419D;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs SPAN\n";
+print OUTPUT "{\n";
+print OUTPUT "   float            : left;\n";
+print OUTPUT "   display          : block;\n";
+print OUTPUT "   background       : url(\"tab_l.gif\") no-repeat left top;\n";
+print OUTPUT "   padding          : 5px 9px;\n";
+print OUTPUT "   white-space      : nowrap;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs INPUT\n";
+print OUTPUT "{\n";
+print OUTPUT "   float            : right;\n";
+print OUTPUT "   display          : inline;\n";
+print OUTPUT "   font-size        : 1em;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs TD\n";
+print OUTPUT "{\n";
+print OUTPUT "   font-size        : x-small;\n";
+print OUTPUT "   font-weight      : bold;\n";
+print OUTPUT "   text-decoration  : none;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs SPAN {float : none;}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs A:hover SPAN\n";
+print OUTPUT "{\n";
+print OUTPUT "   background-position: 0% -150px;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs LI\#current A\n";
+print OUTPUT "{\n";
+print OUTPUT "   background-position: 100% -150px;\n";
+print OUTPUT "   border-width     : 0px;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.tabs LI\#current SPAN\n";
+print OUTPUT "{\n";
+print OUTPUT "   background-position: 0% -150px;\n";
+print OUTPUT "   padding-bottom   : 6px;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.nav\n";
+print OUTPUT "{\n";
+print OUTPUT "   background       : none;\n";
+print OUTPUT "   border           : none;\n";
+print OUTPUT "   border-bottom    : 1px solid \#84B0C7;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "DIV.groupHeader\n";
+print OUTPUT "{ \n";
+print OUTPUT "  padding-top: 30px;\n";
+print OUTPUT "  padding-bottom: 20px;\n";
+print OUTPUT "  background       : none;\n";
+print OUTPUT "  border           : none;\n";
+print OUTPUT "  border-bottom    : 1px solid \#84B0C7;\n";
+print OUTPUT "  font-family: \'Lucida Grande\',\'Lucida Sans Unicode\',Verdana,Sans-Serif;\n";
+print OUTPUT "  font-variant: small-caps;\n";
+print OUTPUT "  font-size: 14pt;\n";
+print OUTPUT "  color:\#0066CC;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT ".directory p \n";
+print OUTPUT "{ \n";
+print OUTPUT "    margin: 0px; \n";
+print OUTPUT "    white-space: nowrap; \n";
+print OUTPUT "    font-family: \'Lucida Grande\',\'Lucida Sans Unicode\',Verdana,Sans-Serif;\n";
+print OUTPUT "    font-size: 10pt;\n";
+print OUTPUT "    font-weight: normal;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "\n";
+print OUTPUT ".directory h3 \n";
+print OUTPUT "{ \n";
+print OUTPUT "    font-family: \'Lucida Grande\',\'Lucida Sans Unicode\',Verdana,Sans-Serif;\n";
+print OUTPUT "    margin: 0px; \n";
+print OUTPUT "    margin-top: 1em; \n";
+print OUTPUT "    padding-bottom: 20px;\n";
+print OUTPUT "    font-size: 12pt; \n";
+print OUTPUT "    font-variant: small-caps;\n";
+print OUTPUT "    text-align: center;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT ".directory a:visited {\n";
+print OUTPUT "    font-weight: bold;\n";
+print OUTPUT "    text-decoration: none;\n";
+print OUTPUT "    color:\#0066CC\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+
+close(OUTPUT);
+
+#
+#  doc/header.html
+#
+
+open(OUTPUT, ">"."$package\/doc\/header.html") or
+  die "Cannot open output file $package\/doc\/header.html \n";
+
+print OUTPUT "<HTML>\n";
+print OUTPUT "    <HEAD>\n";
+print OUTPUT "      <TITLE>$package library documentation<\/TITLE>\n";
+print OUTPUT "      <LINK HREF=\"package.css\" REL=\"stylesheet\" TYPE=\"text\/css\">\n";
+print OUTPUT "    <\/HEAD>\n";
+print OUTPUT "    <BODY>\n";
+print OUTPUT "\n";
+
+close(OUTPUT);
+
+#
+#  doc/footer.html
+#
+
+open(OUTPUT, ">"."$package\/doc\/footer.html") or
+  die "Cannot open output file $package\/doc\/footer.html \n";
+
+print OUTPUT " <br><br>\n";
+print OUTPUT " <hr>\n";
+print OUTPUT " <center>\n";
+print OUTPUT " <img src=\".\/pictures\/footer.jpg\" Height=100>\n";
+print OUTPUT " <br>$package library documentation<\/br>\n";
+print OUTPUT " <\/center>\n";
+print OUTPUT " <hr>\n";
+print OUTPUT " <\/center>\n";
+print OUTPUT " <\/body>\n";
+print OUTPUT " <\/head>\n";
+print OUTPUT "\n";
+
+close(OUTPUT);
+
+#
+#  doc/additionalDoc/package.h
+#
+
+open(OUTPUT, ">"."$package\/doc\/additionalDoc\/package.h") or
+  die "Cannot open output file  \n";
+
+print OUTPUT "\/\*\*\n";
+print OUTPUT "\\mainpage\n";
+print OUTPUT "\n";
+print OUTPUT "\\section intro_$package Introduction\n";
+print OUTPUT "\n";
+print OUTPUT "This package implements ...\n";
+print OUTPUT "\n";
+print OUTPUT "\*\/\n";
+
+close(OUTPUT);
+
+#
+#  include/$package/$package.h
+#
+
+open(OUTPUT, ">"."$package\/include\/$package\/$package.h") or
+  die "Cannot open output file $package\/include\/$package\/$package.h \n";
+
+print OUTPUT "\/\*\n";
+print OUTPUT " \*  Copyright\n";
+print OUTPUT " \*\/\n";
+print OUTPUT "\n";
+print OUTPUT "\#ifndef $package"."_H\n";
+print OUTPUT "\#define $package"."_H\n";
+print OUTPUT "\n";
+print OUTPUT "\/\*\*\n";
+print OUTPUT "  \\brief Main class of package $package\n";
+print OUTPUT " \*\/\n";
+print OUTPUT "\n";
+print OUTPUT "class C$package {\n";
+print OUTPUT "public:\n";
+print OUTPUT "  C$package();\n";
+print OUTPUT "  ~C$package();\n";
+print OUTPUT "\n";
+print OUTPUT "};\n";
+print OUTPUT "\n";
+print OUTPUT "\#endif\n";
+
+
+close(OUTPUT);
+
+#
+#  src/$package.cpp
+#
+
+open(OUTPUT, ">"."$package\/src\/$package.cpp") or
+  die "Cannot open output file $package\/src\/$package.cpp \n";
+
+print OUTPUT "\/\*\n";
+print OUTPUT " \*  Copyright\n";
+print OUTPUT " \*\/\n";
+print OUTPUT "\n";
+print OUTPUT "\#include <iostream>\n";
+print OUTPUT "\#include \"$package\/$package.h\" ";
+print OUTPUT "\n";
+print OUTPUT "\n";
+print OUTPUT "C$package\:\:C$package()\n";
+print OUTPUT "{\n";
+print OUTPUT "  std::cout << \"Constructor of class C$package.\" << std::endl;\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+print OUTPUT "C$package\:\:~C$package()\n";
+print OUTPUT "{\n";
+print OUTPUT "}\n";
+
+close(OUTPUT);
+
+#
+#  INSTALL
+#
+
+open(OUTPUT, ">"."$package\/INSTALL") or
+  die "Cannot open output file $package\/INSTALL \n";
+
+print OUTPUT "#\n";
+print OUTPUT "#  Copyright\n";
+print OUTPUT "#\n";
+print OUTPUT "\n";
+print OUTPUT "Installation instructions for library $package\n";
+print OUTPUT "----------------------------------------------\n";
+print OUTPUT "\n";
+print OUTPUT "It is recommended to create a specific directory to install this package.\n";
+print OUTPUT "mkdir build\n";
+print OUTPUT "cd build\n";
+print OUTPUT "..\/configure [OPTIONS]\n";
+print OUTPUT "make \n";
+print OUTPUT "make install\n";
+
+
+close(OUTPUT);
+
+#
+#  NEWS
+#
+
+open(OUTPUT, ">"."$package\/NEWS") or
+  die "Cannot open output file $package\/NEWS \n";
+
+print OUTPUT "Write in this file the news related to package $package.\n";
+
+close(OUTPUT);
+
+#
+#  README
+#
+
+open(OUTPUT, ">"."$package\/README") or
+  die "Cannot open output file $package\/README \n";
+
+print OUTPUT "See INSTALL for installation instruction.\n";
+
+close(OUTPUT);
+
+#
+#  ChangeLog
+#
+
+open(OUTPUT, ">"."$package\/ChangeLog") or
+  die "Cannot open output file $package\/ChangeLog \n";
+
+print OUTPUT "Write in this file the modifications you commit.\n";
+
+close(OUTPUT);
+
+#
+#  AUTHORS
+#
+
+open(OUTPUT, ">"."$package\/AUTHORS") or
+  die "Cannot open output file $package\/ \n";
+
+print OUTPUT "Authors: \n";
+
+close(OUTPUT);
+
+#
+#  COPYING
+#
+
+open(OUTPUT, ">"."$package\/COPYING") or
+  die "Cannot open output file $package\/COPYING \n";
+
+print OUTPUT "\#\n";
+print OUTPUT "\# Copyright (c) \n";
+print OUTPUT "\#\n";
+print OUTPUT "\# Permission to use, copy, modify, and distribute this software for any\n";
+print OUTPUT "\# purpose with or without fee is hereby granted, provided that the above\n";
+print OUTPUT "\# copyright notice and this permission notice appear in all copies.\n";
+print OUTPUT "\#\n";
+print OUTPUT "\# THE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES\n";
+print OUTPUT "\# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF\n";
+print OUTPUT "\# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR\n";
+print OUTPUT "\# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\n";
+print OUTPUT "\# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN\n";
+print OUTPUT "\# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF\n";
+print OUTPUT "\# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.\n";
+print OUTPUT "\n";
+
+close(OUTPUT);
+
+#
+#  doc/pictures/footer.txt
+#
+
+open(OUTPUT, ">"."$package\/doc\/pictures\/footer.txt") or
+  die "Cannot open output file $package\/doc\/pictures\/footer.txt \n";
+
+
+print OUTPUT "Copy in this directory the image you wish to use in the footer of the documentation or edit file $package\/doc\/footer.html and\n";
+print OUTPUT "remove this file.\n";
+
+close(OUTPUT);
+
+#
+#  unitTesting/Makefile.am
+#
+
+open(OUTPUT, ">"."$package\/unitTesting\/Makefile.am") or
+  die "Cannot open output file $package\/unitTesting\/Makefile.am \n";
+
+print OUTPUT "# \n";
+print OUTPUT "#  Copyright \n";
+print OUTPUT "# \n";
+print OUTPUT "\n";
+print OUTPUT "\n";
+print OUTPUT "EXTRA_DIST = $package"."Test.h\n";
+print OUTPUT "\n";
+print OUTPUT "noinst_PROGRAMS = test"."$package\n";
+print OUTPUT "test"."$package"."_SOURCES = main.cpp \\\n";
+print OUTPUT "\t"."$package"."Test.cpp\n";
+print OUTPUT "\n";
+print OUTPUT "test"."$package"."_CPPFLAGS = \\\n";
+print OUTPUT "\t"."-I\$(top_srcdir)/include";
+for ($iDep=0; $iDep<$nDep; $iDep++) {
+  print OUTPUT " \\\n";
+  print OUTPUT "\t"."\$($DEP[$iDep]_CFLAGS)\$";
+}
+print OUTPUT "\n";
+print OUTPUT "test"."$package"."_LDFLAGS = \\\n";
+for ($iDep=0; $iDep<$nDep; $iDep++) {
+  print OUTPUT "\t"."\$($DEP[$iDep]_LIBS)\$ \\\n";
+}
+print OUTPUT "\t"."../src/.libs/lib$package.a\n";
+
+close(OUTPUT);
+
+#
+#  unitTesting/main.cpp
+#
+
+open(OUTPUT, ">"."$package\/unitTesting\/main.cpp") or
+  die "Cannot open output file $package\/unitTesting\/main.cpp \n";
+
+print OUTPUT "\/\*\n";
+print OUTPUT " \*  Copyright\n";
+print OUTPUT " \*\/\n";
+print OUTPUT "\n";
+print OUTPUT "\#include \"$package"."Test.h\" \n";
+print OUTPUT "\n";
+print OUTPUT "int main (int argc, char\*\* argv)\n";
+print OUTPUT "{\n";
+print OUTPUT "  C$package"."Test testC$package();\n";
+print OUTPUT "}\n";
+print OUTPUT "\n";
+
+close(OUTPUT);
+
+
+#
+#  unitTesting\/$package"."Test.h
+#
+
+open(OUTPUT, ">"."$package\/unitTesting\/$package"."Test.h") or
+  die "Cannot open output file $package\/unitTesting\/$package"."Test.h \n";
+
+print OUTPUT "\/\*\n";
+print OUTPUT " \*  Copyright\n";
+print OUTPUT " \*\/\n";
+print OUTPUT "\n";
+print OUTPUT "\#include \"$package\/$package.h\" \n";
+print OUTPUT "\n";
+print OUTPUT "\/\**\n";
+print OUTPUT " \\brief UnitTesting class of class C$package\n";
+print OUTPUT "\*\/\n";
+print OUTPUT "class C$package"."Test\n";
+print OUTPUT "{\n";
+print OUTPUT "public:\n";
+print OUTPUT "  \/\**\n";
+print OUTPUT "   \\brief Constructor\n";
+print OUTPUT "  \*\/\n";
+print OUTPUT "  C$package"."Test();\n";
+print OUTPUT "private:\n";
+print OUTPUT "  C$package attC$package;\n";
+print OUTPUT "};\n";
+print OUTPUT "\n";
+
+close(OUTPUT);
+
+
+#
+#  unitTesting\/$package"."Test.cpp
+#
+
+open(OUTPUT, ">"."$package\/unitTesting\/$package"."Test.cpp") or
+  die "Cannot open output file $package\/unitTesting\/$package"."Test.cpp \n";
+
+print OUTPUT "\/\*\n";
+print OUTPUT " \*  Copyright\n";
+print OUTPUT " \*\/\n";
+print OUTPUT "\n";
+print OUTPUT "\#include <iostream>\n";
+print OUTPUT "\#include \"$package"."Test.h\" \n";
+print OUTPUT "\n";
+print OUTPUT "C$package"."Test\:\:C$package"."Test()\n";
+print OUTPUT "{\n";
+print OUTPUT "  std::cout << \"Constructor of unitTesting object of class C$package.\" << std::endl;\n";
+print OUTPUT "}\n";
+
+close(OUTPUT);

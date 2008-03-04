@@ -1,0 +1,14 @@
+2008/03/04
+	5. Modification of the style file in order better highlight detailled descriptions.
+	
+2007/12/21
+	4. Correction in compilation of dist rule.
+	
+2007/11/15
+	3. Added autogen.sh file.
+	
+2007/04/20
+	packageCreate: 
+	1. Modified Makefile.am in order to compile doc only at installation
+	2. Added generation of package.doxytag in order to make doxygen find documentation of dependencies.
+	
