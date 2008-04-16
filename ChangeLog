@@ -1,3 +1,5 @@
+2008/04/16
+	6. Added commands in configure.ac to set CXXFLAGS and CFLAGS env variables to -Wall if not already defined.
 2008/03/04
 	5. Modification of the style file in order better highlight detailled descriptions.
 	
