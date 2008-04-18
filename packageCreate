@@ -923,9 +923,22 @@ print OUTPUT "\#include <iostream>\n";
 print OUTPUT "\#include \"$package\/$package.h\" ";
 print OUTPUT "\n";
 print OUTPUT "\n";
+print OUTPUT "// Select verbosity at configuration by setting CXXFLAGS=\"... -DDEBUG=[1 or 2]\"\n";
+print OUTPUT "\#if DEBUG==2\n";
+print OUTPUT "\#define ODEBUG2(x) std::cerr << \"$package:\" << x << std::endl\n";
+print OUTPUT "\#define ODEBUG1(x) std::cerr << \"$package:\" << x << std::endl\n";
+print OUTPUT "\#elif DEBUG==1\n";
+print OUTPUT "\#define ODEBUG2(x)\n";
+print OUTPUT "\#define ODEBUG1(x) std::cerr << \"$package:\" << x << std::endl\n";
+print OUTPUT "\#else\n";
+print OUTPUT "\#define ODEBUG2(x)\n";
+print OUTPUT "\#define ODEBUG1(x)\n";
+print OUTPUT "\#endif\n";
+print OUTPUT "\n";
 print OUTPUT "C$package\:\:C$package()\n";
 print OUTPUT "{\n";
-print OUTPUT "  std::cout << \"Constructor of class C$package.\" << std::endl;\n";
+print OUTPUT "  ODEBUG2(\"message of level 2\");\n";
+print OUTPUT "  ODEBUG1(\"message of level 1\");\n";
 print OUTPUT "}\n";
 print OUTPUT "\n";
 print OUTPUT "C$package\:\:~C$package()\n";
@@ -1090,6 +1103,8 @@ print OUTPUT "int main (int argc, char\*\* argv)\n";
 print OUTPUT "{\n";
 print OUTPUT "  C$package"."Test testC$package();\n";
 print OUTPUT "}\n";
+print OUTPUT "  C$package *variable=new C$package();\n";
+print OUTPUT "\n";
 print OUTPUT "\n";
 
 close(OUTPUT);
@@ -1119,7 +1134,7 @@ print OUTPUT "   \\brief Constructor\n";
 print OUTPUT "  \*\/\n";
 print OUTPUT "  C$package"."Test();\n";
 print OUTPUT "private:\n";
-print OUTPUT "  C$package attC$package;\n";
+print OUTPUT "  C$package att$package;\n";
 print OUTPUT "};\n";
 print OUTPUT "\n";
 
@@ -1146,3 +1161,12 @@ print OUTPUT "  std::cout << \"Constructor of unitTesting object of class C$pack
 print OUTPUT "}\n";
 
 close(OUTPUT);
+
+print "To configure and test this package, do the following commands\n";
+print "cd $package\n";
+print "./autogen.sh\n";
+print "mkdir build\n";
+print "cd build\n";
+print "../configure --prefix=... CXXFLAGS=\"-g -Wall -DDEBUG=2\"\n";
+print "make\n";
+print "make install\n";
