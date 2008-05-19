@@ -1,6 +1,9 @@
+2008/05/19
+	9. Remove obsolete doxygen directives.
+	
 2008/04/18
 
-	8. In src/package.cpp, debug message are fitered out by compilation option -DDEBUG=1 or 2.
+	8. In src/package.cpp, debug message are filtered out by compilation option -DDEBUG=1 or 2.
 	7. Added output to explain how to use the package
 	
 2008/04/16

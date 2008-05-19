@@ -291,7 +291,6 @@ print OUTPUT "#-----------------------------------------------------------------
 print OUTPUT "OUTPUT_DIRECTORY       = .\n";
 print OUTPUT "CREATE_SUBDIRS         = NO\n";
 print OUTPUT "OUTPUT_LANGUAGE        = English\n";
-print OUTPUT "USE_WINDOWS_ENCODING   = YES\n";
 print OUTPUT "BRIEF_MEMBER_DESC      = YES\n";
 print OUTPUT "REPEAT_BRIEF           = YES\n";
 print OUTPUT "ABBREVIATE_BRIEF       = \"The \$name class\" \\\n";
@@ -572,8 +571,6 @@ print OUTPUT "DIRECTORY_GRAPH        = YES\n";
 print OUTPUT "DOT_IMAGE_FORMAT       = png\n";
 print OUTPUT "DOT_PATH               = \n";
 print OUTPUT "DOTFILE_DIRS           = \n";
-print OUTPUT "MAX_DOT_GRAPH_WIDTH    = 1024\n";
-print OUTPUT "MAX_DOT_GRAPH_HEIGHT   = 1024\n";
 print OUTPUT "MAX_DOT_GRAPH_DEPTH    = 1000\n";
 print OUTPUT "DOT_TRANSPARENT        = NO\n";
 print OUTPUT "DOT_MULTI_TARGETS      = YES\n";
