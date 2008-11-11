@@ -9,39 +9,78 @@ $package = 0;
 
 while ($i<$#ARGV+1) {
   if ($ARGV[$i] eq "-d") {
+    #
+    # Dependency
+    #
     $i++;
     if ($i<$#ARGV+1) {
       $dep[$nDep] = $ARGV[$i];
       $nDep++;
       $i++;
     } else {
-      die "Usage: packageCreate <packageName> -d package PACKAGE \n";
+      die "Usage: packageCreate <packageName> -d dependency DEPENDENCY -dd docDependency DOCDEPENDENCY \n";
     }
     if ($i<$#ARGV+1) {
       $DEP[$nDep-1] = $ARGV[$i];
       $i++;
     } else {
-      die "Usage: packageCreate <packageName> -d package PACKAGE \n";
+      die "Usage: packageCreate <packageName> -d dependency DEPENDENCY -dd docDependency DOCDEPENDENCY \n";
     }
+  }
+  elsif ($ARGV[$i] eq "-dd") {
+    #
+    # Documentation Dependency
+    #
+    $i++;
+    if ($i<$#ARGV+1) {
+      $docDep[$nDocDep] = $ARGV[$i];
+      $nDocDep++;
+      $i++;
+    } else {
+      die "Usage: packageCreate <packageName> -d dependency DEPENDENCY -dd docDependency DOCDEPENDENCY \n";
+    }
+    if ($i<$#ARGV+1) {
+      $DOCDEP[$nDocDep-1] = $ARGV[$i];
+      $i++;
+    } else {
+      die "Usage: packageCreate <packageName> -d dependency DEPENDENCY -dd docDependency DOCDEPENDENCY \n";
+    }
+  }
+  elsif ($ARGV[$i] eq "--help") {
+    print "packageCreate <packageName> -d dependency DEPENDENCY -dd docDependency DOCDEPENDENCY
+  create an autotool managed package with unitTesting and documentation.
+
+  -d dependency DEPENDENCY
+     defines a compilation dependency from this package to package dependency. DEPENDENCY can be 
+     any string but preferably the capitalized name of the dependency.
+
+  -d docDependency DOCDEPENDENCY
+     defines a documentation dependency from this package to package docDependency. DOCDEPENDENCY
+     can be any string but preferably the capitalized name of the dependency.
+     Documentation dependencies are handled by doxygen to track class inheritance between packages.\n";
+    exit;
   }
   else {
     if (!$package) {
       $package = $ARGV[$i];
       $i++;
     } else {
-      die "Usage: packageCreate <packageName> -d package PACKAGE \n";
+      die "Usage: packageCreate <packageName> -d package PACKAGE \n -dd package PACKAGE";
     }
   }
 }
 
 if (!$package) {
-  die "Usage: packageCreate <packageName> -d package PACKAGE \n";
+  die "Usage: packageCreate <packageName> -d dependency DEPENDENCY -dd docDependency DOCDEPENDENCY \n";
 }
 
-print "Number of dependences: $nDep \n";
-
+print "Number of dependencies: $nDep \n";
 for ($i=0; $i<$nDep; $i++) {
   print "  dependence $i: $dep[$i] $DEP[$i]\n";
+}
+print "Number of documentation dependencies: $nDocDep \n";
+for ($i=0; $i<$nDocDep; $i++) {
+  print "  doc dependence $i: $docDep[$i] $DOCDEP[$i]\n";
 }
 print "package name: $package\n";
 
@@ -96,9 +135,19 @@ print OUTPUT "\n";
 for ($iDep=0; $iDep<$nDep; $iDep++) {
   print OUTPUT "PKG_CHECK_MODULES($DEP[$iDep], $dep[$iDep])\n";
   print OUTPUT "$DEP[$iDep]_PREFIX=\`\$PKG_CONFIG $dep[$iDep] --variable=prefix\`\n";
+  print OUTPUT "$DEP[$iDep]_DOCDIR=\`\$PKG_CONFIG $dep[$iDep] --variable=docdir\`\n";
   print OUTPUT "AC_SUBST($DEP[$iDep]_CFLAGS)\n";
   print OUTPUT "AC_SUBST($DEP[$iDep]_LIBS)\n";
   print OUTPUT "AC_SUBST($DEP[$iDep]_PREFIX)\n";
+  print OUTPUT "AC_SUBST($DEP[$iDep]_DOCDIR)\n";
+  print OUTPUT "\n"
+}
+for ($iDocDep=0; $iDocDep<$nDocDep; $iDocDep++) {
+  print OUTPUT "PKG_CHECK_MODULES($DOCDEP[$iDocDep], $docDep[$iDocDep])\n";
+  print OUTPUT "$DOCDEP[$iDocDep]_PREFIX=\`\$PKG_CONFIG $docDep[$iDocDep] --variable=prefix\`\n";
+  print OUTPUT "$DOCDEP[$iDocDep]_DOCDIR=\`\$PKG_CONFIG $docDep[$iDocDep] --variable=docdir\`\n";
+  print OUTPUT "AC_SUBST($DEP[$iDocDep]_PREFIX)\n";
+  print OUTPUT "AC_SUBST($DEP[$iDocDep]_DOCDIR)\n";
   print OUTPUT "\n"
 }
 print OUTPUT "AC_OUTPUT(\n";
@@ -443,7 +492,10 @@ print OUTPUT "# Configuration::additions related to external references   \n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
 print OUTPUT "TAGFILES               = \\\n";
 for ($iDep=0; $iDep<$nDep; $iDep++) {
-  print OUTPUT "\t"."\@$DEP[$iDep]_PREFIX\@/share/doc/doxytag/$dep[$iDep].doxytag=\@$DEP[$iDep]_PREFIX\@/share/doc/$dep[$iDep] \\\n";
+  print OUTPUT "\t"."\@$DEP[$iDep]_PREFIX\@/share/doc/doxytag/$dep[$iDep].doxytag=\@$DEP[$iDep]_DOCDIR \\\n";
+}
+for ($iDocDep=0; $iDocDep<$nDocDep; $iDocDep++) {
+  print OUTPUT "\t"."\@$DOCDEP[$iDocDep]_PREFIX\@/share/doc/doxytag/$docDep[$iDocDep].doxytag=\@$DOCDEP[$iDocDep]_DOCDIR \\\n";
 }
 print OUTPUT "\n";
 print OUTPUT "GENERATE_TAGFILE       = $package.doxytag\n";
