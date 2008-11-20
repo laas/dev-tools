@@ -492,10 +492,10 @@ print OUTPUT "# Configuration::additions related to external references   \n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
 print OUTPUT "TAGFILES               = \\\n";
 for ($iDep=0; $iDep<$nDep; $iDep++) {
-  print OUTPUT "\t"."\@$DEP[$iDep]_PREFIX\@/share/doc/doxytag/$dep[$iDep].doxytag=\@$DEP[$iDep]_DOCDIR \\\n";
+  print OUTPUT "\t"."\@$DEP[$iDep]_DOCDIR\@/$dep[$iDep].doxytag=\@$DEP[$iDep]_DOCDIR \\\n";
 }
 for ($iDocDep=0; $iDocDep<$nDocDep; $iDocDep++) {
-  print OUTPUT "\t"."\@$DOCDEP[$iDocDep]_PREFIX\@/share/doc/doxytag/$docDep[$iDocDep].doxytag=\@$DOCDEP[$iDocDep]_DOCDIR \\\n";
+  print OUTPUT "\t"."\@$DOCDEP[$iDocDep]_DOCDIR\@/$docDep[$iDocDep].doxytag=\@$DOCDEP[$iDocDep]_DOCDIR \\\n";
 }
 print OUTPUT "\n";
 print OUTPUT "GENERATE_TAGFILE       = $package.doxytag\n";
