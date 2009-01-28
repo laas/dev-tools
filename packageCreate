@@ -18,13 +18,7 @@ while ($i<$#ARGV+1) {
       $nDep++;
       $i++;
     } else {
-      die "Usage: packageCreate <packageName> -d dependency DEPENDENCY -dd docDependency DOCDEPENDENCY \n";
-    }
-    if ($i<$#ARGV+1) {
-      $DEP[$nDep-1] = $ARGV[$i];
-      $i++;
-    } else {
-      die "Usage: packageCreate <packageName> -d dependency DEPENDENCY -dd docDependency DOCDEPENDENCY \n";
+      die "Usage: packageCreate <packageName> -d dependency -dd docDependency \n";
     }
   }
   elsif ($ARGV[$i] eq "-dd") {
@@ -37,27 +31,21 @@ while ($i<$#ARGV+1) {
       $nDocDep++;
       $i++;
     } else {
-      die "Usage: packageCreate <packageName> -d dependency DEPENDENCY -dd docDependency DOCDEPENDENCY \n";
-    }
-    if ($i<$#ARGV+1) {
-      $DOCDEP[$nDocDep-1] = $ARGV[$i];
-      $i++;
-    } else {
-      die "Usage: packageCreate <packageName> -d dependency DEPENDENCY -dd docDependency DOCDEPENDENCY \n";
+      die "Usage: packageCreate <packageName> -d dependency -dd docDependency \n";
     }
   }
   elsif ($ARGV[$i] eq "--help") {
-    print "packageCreate <packageName> -d dependency DEPENDENCY -dd docDependency DOCDEPENDENCY
-  create an autotool managed package with unitTesting and documentation.
+    print "packageCreate <packageName> -d dependency -dd docDependency
+  create a cmake managed package with unitTesting and documentation.
 
-  -d dependency DEPENDENCY
-     defines a compilation dependency from this package to package dependency. DEPENDENCY can be 
-     any string but preferably the capitalized name of the dependency.
+  -d dependency
+     defines a compilation dependency from this package to package dependency.
+     Package dependency should be installed and accessible from pkg-config.
 
-  -d docDependency DOCDEPENDENCY
-     defines a documentation dependency from this package to package docDependency. DOCDEPENDENCY
-     can be any string but preferably the capitalized name of the dependency.
+  -dd docDependency
+     defines a documentation dependency from this package to package docDependency. 
      Documentation dependencies are handled by doxygen to track class inheritance between packages.\n";
+     Package docDependency should be installed and accessible from pkg-config.
     exit;
   }
   else {
@@ -71,16 +59,16 @@ while ($i<$#ARGV+1) {
 }
 
 if (!$package) {
-  die "Usage: packageCreate <packageName> -d dependency DEPENDENCY -dd docDependency DOCDEPENDENCY \n";
+  die "Usage: packageCreate <packageName> -d dependency -dd docDependency \n";
 }
 
 print "Number of dependencies: $nDep \n";
 for ($i=0; $i<$nDep; $i++) {
-  print "  dependence $i: $dep[$i] $DEP[$i]\n";
+  print "  dependence $i: $dep[$i]\n";
 }
 print "Number of documentation dependencies: $nDocDep \n";
 for ($i=0; $i<$nDocDep; $i++) {
-  print "  doc dependence $i: $docDep[$i] $DOCDEP[$i]\n";
+  print "  doc dependency $i: $docDep[$i]\n";
 }
 print "package name: $package\n";
 
@@ -95,241 +83,290 @@ mkdir "$package/doc/pictures";
 mkdir "$package/unitTesting";
 
 #
-#  configure.ac
+#  package.pc.cmake
 #
 
-open(OUTPUT, ">"."$package/configure.ac") or
-  die "Cannot open output file $package/configure.ac \n";
-
-print OUTPUT "\n";
-print OUTPUT "dnl \n";
-print OUTPUT "dnl configure.ac file for package $package \n";
-print OUTPUT "dnl\n";
-print OUTPUT "\n";
-print OUTPUT "AC_INIT([$package], [1.0], [support\@company.com])\n";
-print OUTPUT "AC_PREREQ(2.59)\n";
-print OUTPUT "\n";
-print OUTPUT "if test \"\$CFLAGS\$CXXFLAGS\" = \"\"; then\n";
-print OUTPUT "  setdefaultflags=yes\n";
-print OUTPUT "else\n";
-print OUTPUT "  setdefaultflags=no\n";
-print OUTPUT "fi\n";
-print OUTPUT "\n";
-print OUTPUT "AM_INIT_AUTOMAKE([no-define])\n";
-print OUTPUT "\n";
-print OUTPUT "AC_PROG_INSTALL\n";
-print OUTPUT "AC_PROG_LIBTOOL\n";
-print OUTPUT "AC_PROG_CXX\n";
-print OUTPUT "\n";
-print OUTPUT "if test \"\$setdefaultflags\" = \"yes\"; then\n";
-print OUTPUT "  if test \"\$GCC\" = \"yes\"; then\n";
-print OUTPUT "    CFLAGS=\"\$CFLAGS -Wall\"\n";
-print OUTPUT "    AC_MSG_NOTICE([adding default \"-Wall\" c flags])\n";
-print OUTPUT "  fi\n";
-print OUTPUT "  if test \"\$GXX\" = \"yes\"; then\n";
-print OUTPUT "    CXXFLAGS=\"\$CXXFLAGS -Wall\"\n";
-print OUTPUT "    AC_MSG_NOTICE([adding default \"-Wall\" c++ flags])\n";
-print OUTPUT "  fi\n";
-print OUTPUT "fi\n";
-print OUTPUT "\n";
-for ($iDep=0; $iDep<$nDep; $iDep++) {
-  print OUTPUT "PKG_CHECK_MODULES($DEP[$iDep], $dep[$iDep])\n";
-  print OUTPUT "$DEP[$iDep]_PREFIX=\`\$PKG_CONFIG $dep[$iDep] --variable=prefix\`\n";
-  print OUTPUT "$DEP[$iDep]_DOCDIR=\`\$PKG_CONFIG $dep[$iDep] --variable=docdir\`\n";
-  print OUTPUT "AC_SUBST($DEP[$iDep]_CFLAGS)\n";
-  print OUTPUT "AC_SUBST($DEP[$iDep]_LIBS)\n";
-  print OUTPUT "AC_SUBST($DEP[$iDep]_PREFIX)\n";
-  print OUTPUT "AC_SUBST($DEP[$iDep]_DOCDIR)\n";
-  print OUTPUT "\n"
-}
-for ($iDocDep=0; $iDocDep<$nDocDep; $iDocDep++) {
-  print OUTPUT "PKG_CHECK_MODULES($DOCDEP[$iDocDep], $docDep[$iDocDep])\n";
-  print OUTPUT "$DOCDEP[$iDocDep]_PREFIX=\`\$PKG_CONFIG $docDep[$iDocDep] --variable=prefix\`\n";
-  print OUTPUT "$DOCDEP[$iDocDep]_DOCDIR=\`\$PKG_CONFIG $docDep[$iDocDep] --variable=docdir\`\n";
-  print OUTPUT "AC_SUBST($DEP[$iDocDep]_PREFIX)\n";
-  print OUTPUT "AC_SUBST($DEP[$iDocDep]_DOCDIR)\n";
-  print OUTPUT "\n"
-}
-print OUTPUT "AC_OUTPUT(\n";
-print OUTPUT "	$package.pc\n";
-print OUTPUT "	Makefile\n";
-print OUTPUT "	include/Makefile\n";
-print OUTPUT "	src/Makefile\n";
-print OUTPUT "	doc/Makefile\n";
-print OUTPUT "	doc/package.dox\n";
-print OUTPUT "	unitTesting/Makefile\n";
-print OUTPUT "	)\n";
-
-close(OUTPUT);
-
-#
-#  package.pc.in
-#
-
-open(OUTPUT, ">"."$package\/$package".".pc.in") or
+open(OUTPUT, ">"."$package\/$package".".pc.cmake") or
   die "Cannot open output file $package/ \n";
 
-print OUTPUT "prefix=\@prefix\@\n";
-print OUTPUT "exec_prefix=\@exec_prefix\@\n";
-print OUTPUT "libdir=\@libdir\@\n";
-print OUTPUT "includedir=\@includedir\@\n";
-print OUTPUT "datarootdir=\@datarootdir\@\n";
-print OUTPUT "docdir=\@datadir\@/doc/\@PACKAGE_NAME\@\n";
+print OUTPUT "prefix=\${CMAKE_INSTALL_PREFIX}\n";
+print OUTPUT "exec_prefix=\${install_pkg_prefix}\n";
+print OUTPUT "libdir=\${install_pkg_exec_prefix}/lib\n";
+print OUTPUT "includedir=\${install_pkg_prefix}/include\n";
+print OUTPUT "datarootdir=\${install_pkg_prefix}/share\n";
+print OUTPUT "docdir=\${install_pkg_datarootdir}/doc/\${PROJECT_NAME}\n";
 print OUTPUT "\n";
-print OUTPUT "Name: \@PACKAGE\@\n";
+print OUTPUT "Name: \${PROJECT_NAME}\n";
 print OUTPUT "Description: \n";
-print OUTPUT "Version: \@VERSION\@\n";
-print OUTPUT "Requires: ";
-for ($iDep=0; $iDep<$nDep-1; $iDep++) {
-  print OUTPUT "$dep[$iDep],";
-}
-if ($nDep >= 1) {
-  $iDep = $nDep-1;
-  print OUTPUT "$dep[$iDep]";
-}
-print OUTPUT "\n";
-print OUTPUT "Libs: ";
-print OUTPUT "-L\${libdir} -l$package\n";
-print OUTPUT "Cflags: -I\${includedir}\n";
+print OUTPUT "Version: \${PROJECT_VERSION}\n";
+print OUTPUT "Requires: \${PACKAGE_REQUIREMENTS}\n";
+print OUTPUT "Libs: \${LIBDIR_KW}\${install_pkg_libdir} \${LIBINCLUSION_KW}\${PROJECT_NAME}\n";
+print OUTPUT "Cflags: -I\${install_pkg_include_dir}\n";
 
 close(OUTPUT);
 
 #
-#  Makefile.am
-#
-
-open(OUTPUT, ">"."$package/Makefile.am") or
-  die "Cannot open output file $package/Makefile.am \n";
-
-
-print OUTPUT "# \n";
-print OUTPUT "#  Copyright \n";
-print OUTPUT "# \n";
-print OUTPUT "\n";
-print OUTPUT "SUBDIRS = \\\n";
-print OUTPUT "\t"."src \\\n";
-print OUTPUT "\t"."include \\\n";
-print OUTPUT "\t"."doc \\\n";
-print OUTPUT "\t"."unitTesting\n";
-print OUTPUT "\n";
-print OUTPUT "$package"."dir = \$(libdir)/pkgconfig\n";
-print OUTPUT "$package"."_DATA = $package.pc\n";
-print OUTPUT "\n";
-print OUTPUT "install-data-hook: documentation\n";
-print OUTPUT "\n";
-print OUTPUT "documentation:\n";
-print OUTPUT "\t"."cd doc; \$(MAKE) install\n";
-
-close(OUTPUT);
-
-#
-#  Makefile.am
+#  autogen.sh
 #
 
 open(OUTPUT, ">"."$package/autogen.sh") or
   die "Cannot open output file $package/autogen.sh \n";
 
-print OUTPUT "#!/bin/sh \n";
-print OUTPUT "aclocal \n";
-print OUTPUT "libtoolize -c \n";
-print OUTPUT "automake -ca \n";
-print OUTPUT "autoconf \n";
+print OUTPUT "echo \"\"\n";
+print OUTPUT "echo \"This package is installed through cmake. Please read INSTALL for instructions.\"\n";
+print OUTPUT "echo \"\"\n";
 
 close(OUTPUT);
 system "chmod 775 $package/autogen.sh";
 
 #
-#  include/Makefile.am
+# CMakeLists.txt
 #
 
-open(OUTPUT, ">"."$package\/include\/Makefile.am") or
-  die "Cannot open output file $package\/include\/$package\/Makefile.am \n";
+open(OUTPUT, ">"."$package/CMakeLists.txt") or
+  die "Cannot open output file $package/CMakeLists.txt \n";
 
-print OUTPUT "# \n";
-print OUTPUT "#  Copyright \n";
-print OUTPUT "# \n";
+print OUTPUT "#\n";
+print OUTPUT "#  Copyright\n";
+print OUTPUT "#\n";
 print OUTPUT "\n";
-print OUTPUT "$package"."dir = \@includedir\@/$package\n";
-print OUTPUT "$package"."_HEADERS = \\\n";
-print OUTPUT "\t"."$package/$package.h\n";
-
-close(OUTPUT);
-
-#
-#  src/Makefile.am
-#
-
-open(OUTPUT, ">"."$package\/src\/Makefile.am") or
-  die "Cannot open output file $package\/src\/Makefile.am \n";
-
-print OUTPUT "# \n";
-print OUTPUT "#  Copyright \n";
-print OUTPUT "# \n";
+print OUTPUT "CMAKE_MINIMUM_REQUIRED(VERSION 2.6)\n";
 print OUTPUT "\n";
-print OUTPUT "lib_LTLIBRARIES = lib$package".".la\n";
-print OUTPUT "lib$package"."_la_SOURCES = \\\n";
-print OUTPUT "\t$package".".cpp\n";
+print OUTPUT "SET(PROJECT_NAME $package)\n";
+print OUTPUT "project(\${PROJECT_NAME})\n";
 print OUTPUT "\n";
-print OUTPUT "lib$package"."_la_LDFLAGS = ";
+print OUTPUT "SET(PROJECT_VERSION 1.0)\n";
+print OUTPUT "\n";
+print OUTPUT "SET(CMAKE_BUILD_TYPE Debug)\n";
+print OUTPUT "SET(CMAKE_VERBOSE_MAKEFILE true)\n";
+print OUTPUT "\n";
+print OUTPUT "IF(WIN32)\n";
+print OUTPUT "  SET(LIBDIR_KW \"/LIBPATH:\")\n";
+print OUTPUT "  SET(LIBINCLUSION_KW \"\")\n";
+print OUTPUT "ENDIF(WIN32)\n";
+print OUTPUT "\n";
+print OUTPUT "IF(UNIX)\n";
+print OUTPUT "  SET(LIBDIR_KW \"-L\")\n";
+print OUTPUT "  SET(LIBINCLUSION_KW \"-l\")\n";
+print OUTPUT "ENDIF(UNIX)\n";
+print OUTPUT "\n";
+print OUTPUT "#\n";
+print OUTPUT "# Look for dependencies\n";
+print OUTPUT "#\n";
+print OUTPUT "\n";
+print OUTPUT "# Load Pkgconfig macros\n";
+print OUTPUT "INCLUDE(FindPkgConfig)\n";
+print OUTPUT "SET(PACKAGE_REQUIREMENTS \"\")\n";
 for ($iDep=0; $iDep<$nDep; $iDep++) {
-  print OUTPUT "\\\n";
-  print OUTPUT "\t"."\$($DEP[$iDep]_LIBS)\$ ";
+  print OUTPUT "\n";
+  print OUTPUT "#\n";
+  print OUTPUT "#  Dependency to package ".$dep[$iDep]."\n";
+  print OUTPUT "#\n";
+  print OUTPUT "SET(_".$dep[$iDep]."_FOUND 0)\n";
+  print OUTPUT "SET(_".$dep[$iDep]."_REQUIRED \"".$dep[$iDep]." >= 1.0\")\n";
+  print OUTPUT "PKG_CHECK_MODULES(_".$dep[$iDep]." REQUIRED \${_".$dep[$iDep]."_REQUIRED})\n";
+  print OUTPUT "EXEC_PROGRAM(\${PKG_CONFIG_EXECUTABLE} ARGS  --variable=docdir ".$dep[$iDep]."\n";
+  print OUTPUT "  OUTPUT_VARIABLE _".$dep[$iDep]."_DOCDIR)\n";
+  print OUTPUT "MESSAGE(STATUS \"pkg-config: \${PKG_CONFIG_EXECUTABLE}\")\n";
+  print OUTPUT "MESSAGE(STATUS \"_".$dep[$iDep]."_DOCDIR=\${_".$dep[$iDep]."_DOCDIR}\")\n";
+  print OUTPUT "SET(_".$dep[$iDep]."_FOUND 1)\n";
+  print OUTPUT "\n";
+  print OUTPUT "IF(NOT \${_".$dep[$iDep]."_FOUND})\n";
+  print OUTPUT "  MESSAGE(FATAL_ERROR \"Check that package ".$dep[$iDep]." is installed in a directory pointed out by PKG_CONFIG_PATH.\")\n";
+  print OUTPUT "ENDIF(NOT \${_".$dep[$iDep]."_FOUND})\n";
+  print OUTPUT "  \n";
+  print OUTPUT "IF(PACKAGE_REQUIREMENTS STREQUAL \"\")\n";
+  print OUTPUT "  SET(PACKAGE_REQUIREMENTS \${_".$dep[$iDep]."_REQUIRED})\n";
+  print OUTPUT "ELSE(PACKAGE_REQUIREMENTS STREQUAL \"\")\n";
+  print OUTPUT "  SET(PACKAGE_REQUIREMENTS \"\${PACKAGE_REQUIREMENTS}, \${_".$dep[$iDep]."_REQUIRED}\")\n";
+  print OUTPUT "ENDIF(PACKAGE_REQUIREMENTS STREQUAL \"\")\n";
+  print OUTPUT "\n";
 }
-print OUTPUT "\\\n";
-print OUTPUT "\t"."-release \$(PACKAGE_VERSION)";
-print OUTPUT "\n";
-print OUTPUT "\n";
-print OUTPUT "lib$package"."_la_CPPFLAGS = \\\n";
-print OUTPUT "\t"."-I\$(top_srcdir)/include";
-for ($iDep=0; $iDep<$nDep; $iDep++) {
-  print OUTPUT " \\\n";
-  print OUTPUT "\t"."\$($DEP[$iDep]_CFLAGS)\$";
+for ($iDep=0; $iDep<$nDocDep; $iDep++) {
+  print OUTPUT "\n";
+  print OUTPUT "#\n";
+  print OUTPUT "#  Documentation dependency to package ".$docDep[$iDep]."\n";
+  print OUTPUT "#\n";
+  print OUTPUT "SET(_".$docDep[$iDep]."_FOUND 0)\n";
+  print OUTPUT "SET(_".$docDep[$iDep]."_REQUIRED \"".$docDep[$iDep]." >= 1.0\")\n";
+  print OUTPUT "PKG_CHECK_MODULES(_".$docDep[$iDep]." REQUIRED \${_".$docDep[$iDep]."_REQUIRED})\n";
+  print OUTPUT "EXEC_PROGRAM(\${PKG_CONFIG_EXECUTABLE} ARGS  --variable=docdir ".$docDep[$iDep]."\n";
+  print OUTPUT "  OUTPUT_VARIABLE _".$docDep[$iDep]."_DOCDIR)\n";
+  print OUTPUT "MESSAGE(STATUS \"pkg-config: \${PKG_CONFIG_EXECUTABLE}\")\n";
+  print OUTPUT "MESSAGE(STATUS \"_".$docDep[$iDep]."_DOCDIR=\${_".$docDep[$iDep]."_DOCDIR}\")\n";
+  print OUTPUT "SET(_".$docDep[$iDep]."_FOUND 1)\n";
+  print OUTPUT "\n";
+  print OUTPUT "IF(NOT \${_".$docDep[$iDep]."_FOUND})\n";
+  print OUTPUT "  MESSAGE(FATAL_ERROR \"Check that package ".$docDep[$iDep]." is installed in a directory pointed out by PKG_CONFIG_PATH.\")\n";
+  print OUTPUT "ENDIF(NOT \${_".$docDep[$iDep]."_FOUND})\n";
+  print OUTPUT "  \n";
 }
+print OUTPUT "#\n";
+print OUTPUT "# pkg-config file\n";
+print OUTPUT "#\n";
+print OUTPUT "\n";
+print OUTPUT "SET(install_pkg_prefix \"\\\${prefix}\")\n";
+print OUTPUT "SET(install_pkg_exec_prefix \"\\\${exec_prefix}\")\n";
+print OUTPUT "SET(install_pkg_libdir \"\\\${libdir}\")\n";
+print OUTPUT "SET(install_pkg_datarootdir \"\\\${datarootdir}\")\n";
+print OUTPUT "SET(install_pkg_include_dir \"\\\${includedir}\")\n";
+print OUTPUT "\n";
+print OUTPUT "IF(UNIX)\n";
+print OUTPUT "  SET (\${\${PROJECT_NAME}}_LDFLAGS \"-Wl,-R\${install_pkg_libdir} \${\${\${PROJECT_NAME}}_LDFLAGS}\")\n";
+print OUTPUT "ENDIF(UNIX)\n";
+print OUTPUT "\n";
+print OUTPUT "# Install the file in the appropriate place.\n";
+print OUTPUT "SET(install_libdir_pkgconfig \${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)\n";
+print OUTPUT "\n";
+print OUTPUT "CONFIGURE_FILE(\${CMAKE_CURRENT_SOURCE_DIR}/\${PROJECT_NAME}.pc.cmake\n";
+print OUTPUT "  \${CMAKE_CURRENT_BINARY_DIR}/\${PROJECT_NAME}.pc)\n";
+print OUTPUT "\n";
+print OUTPUT "INSTALL(FILES \${CMAKE_CURRENT_BINARY_DIR}/\${PROJECT_NAME}.pc\n";
+print OUTPUT "  DESTINATION \${install_libdir_pkgconfig}	\n";
+print OUTPUT "  PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE)\n";
+print OUTPUT "\n";
+print OUTPUT "ADD_SUBDIRECTORY(src)\n";
+print OUTPUT "ADD_SUBDIRECTORY(include)\n";
+print OUTPUT "ADD_SUBDIRECTORY(unitTesting)\n";
+print OUTPUT "\n";
+print OUTPUT "#\n";
+print OUTPUT "# Documentation produced by doxygen\n";
+print OUTPUT "#\n";
+print OUTPUT "INCLUDE(FindDoxygen)\n";
+print OUTPUT "IF(DOXYGEN_FOUND)\n";
+print OUTPUT "  add_subdirectory(doc)\n";
+print OUTPUT "ENDIF(DOXYGEN_FOUND)\n";
+
+#
+#  include/CMakeLists.txt
+#
+
+open(OUTPUT, ">"."$package\/include\/CMakeLists.txt") or
+  die "Cannot open output file $package\/include\/$package\/CMakeLists.txt \n";
+
+print OUTPUT "# \n";
+print OUTPUT "#  Copyright \n";
+print OUTPUT "# \n";
+print OUTPUT "\n";
+print OUTPUT "SET(\${PROJECT_NAME}_HEADERS\n";
+print OUTPUT "$package.h\n";
+print OUTPUT ")\n";
+print OUTPUT "\n";
+print OUTPUT "# Recreate correct path for the headers\n";
+print OUTPUT "#--------------------------------------\n";
+print OUTPUT "\n";
+print OUTPUT "SET(fullpath_\${PROJECT_NAME}_HEADERS)\n";
+print OUTPUT "FOREACH(lHeader \${\${PROJECT_NAME}_HEADERS})\n";
+print OUTPUT "  SET(fullpath_\${PROJECT_NAME}_HEADERS \n";
+print OUTPUT "    \${fullpath_\${PROJECT_NAME}_HEADERS}\n";
+print OUTPUT "    ./\${PROJECT_NAME}/\${lHeader}\n";
+print OUTPUT "  )\n";
+print OUTPUT "\n";
+print OUTPUT "ENDFOREACH(lHeader)\n";
+print OUTPUT "\n";
+print OUTPUT "#----------------------------------------------------\n";
+print OUTPUT "# Install procedure for the header files\n";
+print OUTPUT "#----------------------------------------------------\n";
+print OUTPUT "INSTALL(FILES \${fullpath_\${PROJECT_NAME}_HEADERS}\n";
+print OUTPUT "	DESTINATION \${CMAKE_INSTALL_PREFIX}/include/\${PROJECT_NAME}\n";
+print OUTPUT "        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_WRITE\n";
+print OUTPUT ")\n";
 
 close(OUTPUT);
 
 #
-#  doc/Makefile.am
+#  src/CMakeLists.txt
 #
 
-open(OUTPUT, ">"."$package\/doc\/Makefile.am") or
-  die "Cannot open output file $package\/doc\/Makefile.am \n";
+open(OUTPUT, ">"."$package\/src\/CMakeLists.txt") or
+  die "Cannot open output file $package\/src\/CMakeLists.txt \n";
+
+print OUTPUT "# \n";
+print OUTPUT "#  Copyright \n";
+print OUTPUT "# \n";
+print OUTPUT "\n";
+print OUTPUT "SET(LIBRARY_NAME \${PROJECT_NAME})\n";
+print OUTPUT "\n";
+print OUTPUT "INCLUDE_DIRECTORIES(\${CMAKE_SOURCE_DIR}/include)\n";
+print OUTPUT "\n";
+print OUTPUT "ADD_DEFINITIONS(-DDEBUG=2)\n";
+for ($iDep=0; $iDep<$nDep; $iDep++) {
+  print OUTPUT "\n";
+  print OUTPUT "# provide path to library lib".$dep[$iDep].".so\n";
+  print OUTPUT "LINK_DIRECTORIES(\${_".$dep[$iDep]."_LIBRARY_DIRS})\n";
+  print OUTPUT "\n";
+}
+print OUTPUT "ADD_LIBRARY(\${LIBRARY_NAME} \n";
+print OUTPUT "  SHARED\n";
+print OUTPUT "  $package.cpp)\n";
+print OUTPUT "\n";
+print OUTPUT "SET_TARGET_PROPERTIES(\${LIBRARY_NAME} \n";
+print OUTPUT "  PROPERTIES \n";
+print OUTPUT "  SOVERSION \${PROJECT_VERSION}\n";
+print OUTPUT "  INSTALL_RPATH \${CMAKE_INSTALL_PREFIX}/lib)\n";
+print OUTPUT "\n";
+for ($iDep=0; $iDep<$nDep; $iDep++) {
+  print OUTPUT "# Add ".$dep[$iDep]." compilation flags and link to library lib".$dep[$iDep].".so\n";
+  print OUTPUT "ADD_DEFINITIONS(\${_".$dep[$iDep]."_CFLAGS})\n";
+  print OUTPUT "TARGET_LINK_LIBRARIES(\${LIBRARY_NAME} \${_".$dep[$iDep]."_LIBRARIES})\n";
+  print OUTPUT "\n";
+}
+print OUTPUT "INSTALL(TARGETS \${LIBRARY_NAME}\n";
+print OUTPUT "  LIBRARY\n";
+print OUTPUT "  DESTINATION \${CMAKE_INSTALL_PREFIX}/lib)\n";
+
+close(OUTPUT);
+
+#
+#  doc/CMakeLists.txt
+#
+
+open(OUTPUT, ">"."$package\/doc\/CMakeLists.txt") or
+  die "Cannot open output file $package\/doc\/CMakeLists.txt \n";
 
 
 print OUTPUT "# \n";
 print OUTPUT "#  Copyright \n";
 print OUTPUT "# \n";
 print OUTPUT "\n";
-print OUTPUT "\n";
-print OUTPUT "$package"."dir = \$(datadir)/doc/$package\n";
-print OUTPUT "\n";
-print OUTPUT "EXTRA_DIST = \\\n";
-print OUTPUT "\t"."header.html \\\n";
-print OUTPUT "\t"."footer.html \\\n";
-print OUTPUT "\t"."package.css \\\n";
-print OUTPUT "\t"."pictures\/footer.jpg \\\n";
-print OUTPUT "\t"."additionalDoc/package.h \n";
+print OUTPUT "# Configure package.dox file\n";
+print OUTPUT "CONFIGURE_FILE(\${CMAKE_CURRENT_SOURCE_DIR}/package.dox.cmake\n";
+print OUTPUT "  \${CMAKE_CURRENT_BINARY_DIR}/package.dox\n";
+print OUTPUT ")\n";
 print OUTPUT "\n";
 print OUTPUT "\n";
-print OUTPUT "install:html-doc \n";
-print OUTPUT "\t"."mkdir -p \$($package"."dir)\n";
-print OUTPUT "\t"."\$(INSTALL_DATA) html/\* \$($package"."dir)\n";
-print OUTPUT "\t"."mkdir -p \$($package"."dir)/pictures\n";
-print OUTPUT "\t"."\$(INSTALL_DATA) \$(srcdir)/pictures/\* \$($package"."dir)/pictures\n";
-print OUTPUT "\t"."mkdir -p \$(datadir)/doc/doxytag\n";
-print OUTPUT "\t"."\$(INSTALL_DATA) $package.doxytag \$(datadir)/doc/doxytag\n";
+print OUTPUT "ADD_CUSTOM_COMMAND(OUTPUT \${CMAKE_CURRENT_BINARY_DIR}/html/index.html\n";
+print OUTPUT "  COMMAND \${DOXYGEN_EXECUTABLE} \${CMAKE_CURRENT_BINARY_DIR}/package.dox\n";
+print OUTPUT "  DEPENDS \"\"\n";
+print OUTPUT ")\n";
 print OUTPUT "\n";
-print OUTPUT "html-doc: package.dox\n";
-print OUTPUT "	doxygen \$<\n";
+print OUTPUT "ADD_CUSTOM_TARGET(documentation ALL\n";
+print OUTPUT "  DEPENDS \${CMAKE_CURRENT_BINARY_DIR}/html/index.html)\n";
+print OUTPUT "\n";
+print OUTPUT "#\n";
+print OUTPUT "# Install html documentation\n";
+print OUTPUT "#\n";
+print OUTPUT "\n";
+print OUTPUT "# html files\n";
+print OUTPUT "INSTALL(DIRECTORY \${CMAKE_CURRENT_BINARY_DIR}/html\n";
+print OUTPUT "  DESTINATION \${CMAKE_INSTALL_PREFIX}/share/doc/\${PROJECT_NAME})\n";
+print OUTPUT "\n";
+print OUTPUT "# doxytag\n";
+print OUTPUT "INSTALL(FILES \${CMAKE_CURRENT_BINARY_DIR}/\${PROJECT_NAME}.doxytag\n";
+print OUTPUT "  DESTINATION \${CMAKE_INSTALL_PREFIX}/share/doc/\${PROJECT_NAME}/html)\n";
+print OUTPUT "\n";
+print OUTPUT "# pictures\n";
+print OUTPUT "INSTALL(DIRECTORY \${CMAKE_CURRENT_SOURCE_DIR}/pictures\n";
+print OUTPUT "  DESTINATION \${CMAKE_INSTALL_PREFIX}/share/doc/\${PROJECT_NAME}/html)\n";
 
 close(OUTPUT);
 
 #
-#  doc/package.dox.in
+#  doc/package.dox.cmake
 #
 
-open(OUTPUT, ">"."$package\/doc\/package.dox.in") or
-  die "Cannot open output file $package\/doc\/package.dox.in \n";
+open(OUTPUT, ">"."$package\/doc\/package.dox.cmake") or
+  die "Cannot open output file $package\/doc\/package.dox.cmake \n";
 
 print OUTPUT "# Doxyfile 1.4.2\n";
 print OUTPUT "\n";
@@ -401,7 +438,7 @@ print OUTPUT "RECURSIVE              = YES\n";
 print OUTPUT "EXCLUDE                = \n";
 print OUTPUT "EXCLUDE_SYMLINKS       = NO\n";
 print OUTPUT "EXAMPLE_PATH           = \n";
-print OUTPUT "EXAMPLE_PATTERNS       = \*\n";
+print OUTPUT "EXAMPLE_PATTERNS       = *\n";
 print OUTPUT "EXAMPLE_RECURSIVE      = NO\n";
 print OUTPUT "INPUT_FILTER           = \n";
 print OUTPUT "FILTER_PATTERNS        = \n";
@@ -492,16 +529,22 @@ print OUTPUT "# Configuration::additions related to external references   \n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
 print OUTPUT "TAGFILES               = \\\n";
 for ($iDep=0; $iDep<$nDep; $iDep++) {
-  print OUTPUT "\t"."\@$DEP[$iDep]_DOCDIR\@/$dep[$iDep].doxytag=\@$DEP[$iDep]_DOCDIR \\\n";
+  print OUTPUT "\t\${_".$dep[$iDep]."_DOCDIR}/html/".$dep[$iDep].".doxytag=\${_".$dep[$iDep]."_DOCDIR}/html";
+  if ($iDep != $nDep-1 || $nDocDep != 0) {
+    print OUTPUT " \\\n";
+  }
 }
-for ($iDocDep=0; $iDocDep<$nDocDep; $iDocDep++) {
-  print OUTPUT "\t"."\@$DOCDEP[$iDocDep]_DOCDIR\@/$docDep[$iDocDep].doxytag=\@$DOCDEP[$iDocDep]_DOCDIR \\\n";
+for ($iDep=0; $iDep<$nDocDep; $iDep++) {
+  print OUTPUT "\t\${_".$docDep[$iDep]."_DOCDIR}/html/".$docDep[$iDep].".doxytag=\${_".$docDep[$iDep]."_DOCDIR}/html";
+  if ($iDep != $nDocDep-1) {
+    print OUTPUT " \\\n";
+  }
 }
 print OUTPUT "\n";
 print OUTPUT "GENERATE_TAGFILE       = $package.doxytag\n";
 print OUTPUT "ALLEXTERNALS           = NO\n";
 print OUTPUT "EXTERNAL_GROUPS        = YES\n";
-print OUTPUT "PERL_PATH              = \/usr\/bin\/perl\n";
+print OUTPUT "PERL_PATH              = /usr/bin/perl\n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
 print OUTPUT "# Configuration options related to the dot tool   \n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
@@ -516,8 +559,8 @@ print OUTPUT "\n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
 print OUTPUT "# Project related configuration options\n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
-print OUTPUT "PROJECT_NAME           = \"$package library documentation\"\n";
-print OUTPUT "PROJECT_NUMBER         = \@VERSION\@\n";
+print OUTPUT "PROJECT_NAME           = \"\${PROJECT_NAME} library documentation\"\n";
+print OUTPUT "PROJECT_NUMBER         = \${PROJECT_VERSION}\n";
 print OUTPUT "\n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
 print OUTPUT "# Build related configuration options\n";
@@ -544,15 +587,15 @@ print OUTPUT "#-----------------------------------------------------------------
 print OUTPUT "#---------------------------------------------------------------------------\n";
 print OUTPUT "# configuration options related to the input files\n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
-print OUTPUT "FILE_PATTERNS          = \*.h \*.idl\n";
+print OUTPUT "FILE_PATTERNS          = *.h *.idl\n";
 print OUTPUT "EXCLUDE_PATTERNS       = \n";
-print OUTPUT "INPUT                  = \@top_srcdir\@\/include \\\n";
-print OUTPUT "                         \@srcdir\@\/additionalDoc\n";
+print OUTPUT "INPUT                  = \${\${PROJECT_NAME}_SOURCE_DIR}/include \\\n";
+print OUTPUT "                         \${CMAKE_CURRENT_SOURCE_DIR}/additionalDoc\n";
 print OUTPUT "\n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
 print OUTPUT "# configuration options related to inserting images\n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
-print OUTPUT "IMAGE_PATH = \@top_srcdir\@\/doc\/figures\n";
+print OUTPUT "IMAGE_PATH = \${\${PROJECT_NAME}_SOURCE_DIR}/doc/figures\n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
 print OUTPUT "# configuration options related to source browsing\n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
@@ -569,9 +612,9 @@ print OUTPUT "#-----------------------------------------------------------------
 print OUTPUT "# configuration options related to the HTML output\n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
 print OUTPUT "HTML_OUTPUT            = html\n";
-print OUTPUT "HTML_STYLESHEET        = \@srcdir\@\/package.css\n";
-print OUTPUT "HTML_HEADER            = \@srcdir\@\/header.html\n";
-print OUTPUT "HTML_FOOTER            = \@srcdir\@\/footer.html\n";
+print OUTPUT "HTML_STYLESHEET        = \${CMAKE_CURRENT_SOURCE_DIR}/package.css\n";
+print OUTPUT "HTML_HEADER            = \${CMAKE_CURRENT_SOURCE_DIR}/header.html\n";
+print OUTPUT "HTML_FOOTER            = \${CMAKE_CURRENT_SOURCE_DIR}/footer.html\n";
 print OUTPUT "\n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
 print OUTPUT "# configuration options related to the LaTeX output\n";
@@ -1007,16 +1050,20 @@ print OUTPUT "#\n";
 print OUTPUT "#  Copyright\n";
 print OUTPUT "#\n";
 print OUTPUT "\n";
-print OUTPUT "Installation instructions for library $package\n";
+print OUTPUT "Installation instructions for library ".$package."\n";
 print OUTPUT "----------------------------------------------\n";
 print OUTPUT "\n";
 print OUTPUT "It is recommended to create a specific directory to install this package.\n";
 print OUTPUT "mkdir build\n";
 print OUTPUT "cd build\n";
-print OUTPUT "..\/configure [OPTIONS]\n";
+print OUTPUT "cmake [Options] ..\n";
 print OUTPUT "make \n";
 print OUTPUT "make install\n";
-
+print OUTPUT "\n";
+print OUTPUT "Options:\n";
+print OUTPUT "\n";
+print OUTPUT "-DCMAKE_INSTALL_PREFIX=...\n";
+print OUTPUT "  specifies the directory where to install the package.\n";
 
 close(OUTPUT);
 
@@ -1103,35 +1150,40 @@ print OUTPUT "remove this file.\n";
 close(OUTPUT);
 
 #
-#  unitTesting/Makefile.am
+#  unitTesting/CMakeLists.txt
 #
 
-open(OUTPUT, ">"."$package\/unitTesting\/Makefile.am") or
-  die "Cannot open output file $package\/unitTesting\/Makefile.am \n";
+open(OUTPUT, ">"."$package\/unitTesting\/CMakeLists.txt") or
+  die "Cannot open output file $package\/unitTesting\/CMakeLists.txt \n";
 
 print OUTPUT "# \n";
 print OUTPUT "#  Copyright \n";
 print OUTPUT "# \n";
 print OUTPUT "\n";
+print OUTPUT "SET(EXECUTABLE_NAME test\${PROJECT_NAME})\n";
 print OUTPUT "\n";
-print OUTPUT "EXTRA_DIST = $package"."Test.h\n";
-print OUTPUT "\n";
-print OUTPUT "noinst_PROGRAMS = test"."$package\n";
-print OUTPUT "test"."$package"."_SOURCES = main.cpp \\\n";
-print OUTPUT "\t"."$package"."Test.cpp\n";
-print OUTPUT "\n";
-print OUTPUT "test"."$package"."_CPPFLAGS = \\\n";
-print OUTPUT "\t"."-I\$(top_srcdir)/include";
+print OUTPUT "ADD_DEFINITIONS(-DDEBUG=2)\n";
 for ($iDep=0; $iDep<$nDep; $iDep++) {
-  print OUTPUT " \\\n";
-  print OUTPUT "\t"."\$($DEP[$iDep]_CFLAGS)\$";
+  print OUTPUT "\n";
+  print OUTPUT "# provide path to library lib".$dep[$iDep].".so\n";
+  print OUTPUT "LINK_DIRECTORIES(\${_".$dep[$iDep]."_LIBRARY_DIRS})\n";
 }
 print OUTPUT "\n";
-print OUTPUT "test"."$package"."_LDFLAGS = \\\n";
+print OUTPUT "ADD_EXECUTABLE(\${EXECUTABLE_NAME}\n";
+print OUTPUT "  main.cpp\n";
+print OUTPUT "  $package"."Test.cpp)\n";
+print OUTPUT "\n";
+print OUTPUT "INCLUDE_DIRECTORIES(\${CMAKE_SOURCE_DIR}/include)\n";
+print OUTPUT "\n";
+print OUTPUT "LINK_DIRECTORIES(\${\${PROJECT_NAME}_BINARY_DIR}/src)\n";
+print OUTPUT "TARGET_LINK_LIBRARIES(\${EXECUTABLE_NAME}\n";
+print OUTPUT "  $package)\n";
 for ($iDep=0; $iDep<$nDep; $iDep++) {
-  print OUTPUT "\t"."\$($DEP[$iDep]_LIBS)\$ \\\n";
+  print OUTPUT "\n";
+  print OUTPUT "# Add ".$dep[$iDep]." compilation flags and link to library lib".$dep[$iDep].".so\n";
+  print OUTPUT "ADD_DEFINITIONS(\${_".$dep[$iDep]."_CFLAGS})\n";
+  print OUTPUT "TARGET_LINK_LIBRARIES(\${EXECUTABLE_NAME} \${_".$dep[$iDep]."_LIBRARIES})\n";
 }
-print OUTPUT "\t"."../src/.libs/lib$package.a\n";
 
 close(OUTPUT);
 
@@ -1213,9 +1265,8 @@ close(OUTPUT);
 
 print "To configure and test this package, do the following commands\n";
 print "cd $package\n";
-print "./autogen.sh\n";
 print "mkdir build\n";
 print "cd build\n";
-print "../configure --prefix=... CXXFLAGS=\"-g -Wall -DDEBUG=2\"\n";
+print "cmake -DCMAKE_INSTALL_PREFIX=...   ..\n";
 print "make\n";
 print "make install\n";
