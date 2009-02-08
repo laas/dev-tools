@@ -100,8 +100,8 @@ print OUTPUT "Name: \${PROJECT_NAME}\n";
 print OUTPUT "Description: \n";
 print OUTPUT "Version: \${PROJECT_VERSION}\n";
 print OUTPUT "Requires: \${PACKAGE_REQUIREMENTS}\n";
-print OUTPUT "Libs: \${LIBDIR_KW}\${install_pkg_libdir} \${LIBINCLUSION_KW}\${PROJECT_NAME}\n";
-print OUTPUT "Cflags: -I\${install_pkg_include_dir}\n";
+print OUTPUT "Libs: \${LIBDIR_KW}\${install_pkg_libdir} \${\${PROJECT_NAME}_LDFLAGS}\n";
+print OUTPUT "Cflags: -I\${install_pkg_include_dir} \${\${PROJECT_NAME}_CXXFLAGS}\n";
 
 close(OUTPUT);
 
@@ -142,12 +142,14 @@ print OUTPUT "SET(CMAKE_VERBOSE_MAKEFILE true)\n";
 print OUTPUT "\n";
 print OUTPUT "IF(WIN32)\n";
 print OUTPUT "  SET(LIBDIR_KW \"/LIBPATH:\")\n";
-print OUTPUT "  SET(LIBINCLUSION_KW \"\")\n";
+print OUTPUT "  SET(LIBINCL_KW \"\")\n";
+print OUTPUT "  SET(LIB_EXT \".lib\")\n";
 print OUTPUT "ENDIF(WIN32)\n";
 print OUTPUT "\n";
 print OUTPUT "IF(UNIX)\n";
 print OUTPUT "  SET(LIBDIR_KW \"-L\")\n";
-print OUTPUT "  SET(LIBINCLUSION_KW \"-l\")\n";
+print OUTPUT "  SET(LIBINCL_KW \"-l\")\n";
+print OUTPUT "  SET(LIB_EXT \"\")\n";
 print OUTPUT "ENDIF(UNIX)\n";
 print OUTPUT "\n";
 print OUTPUT "#\n";
@@ -212,9 +214,14 @@ print OUTPUT "SET(install_pkg_datarootdir \"\\\${datarootdir}\")\n";
 print OUTPUT "SET(install_pkg_include_dir \"\\\${includedir}\")\n";
 print OUTPUT "\n";
 print OUTPUT "IF(UNIX)\n";
-print OUTPUT "  SET (\${\${PROJECT_NAME}}_LDFLAGS \"-Wl,-R\${install_pkg_libdir} \${\${\${PROJECT_NAME}}_LDFLAGS}\")\n";
+print OUTPUT "  SET (\${\${PROJECT_NAME}}_LDFLAGS \"-Wl,-R\${install_pkg_libdir} \${LIBINCL_KW}\${PROJECT_NAME}\${LIB_EXT} \${\${\${PROJECT_NAME}}_LDFLAGS}\")\n";
 print OUTPUT "ENDIF(UNIX)\n";
 print OUTPUT "\n";
+print OUTPUT "IF(WIN32)\n";
+print OUTPUT "  SET (\${\${PROJECT_NAME}}_LDFLAGS \"\${LIBINCL_KW}\${PROJECT_NAME}-\${PROJECT_VERSION}\${LIB_EXT} \${\${\${PROJECT_NAME}}_LDFLAGS}\")\n";
+print OUTPUT "ENDIF(WIN32)\n";
+print OUTPUT "\n";
+
 print OUTPUT "# Install the file in the appropriate place.\n";
 print OUTPUT "SET(install_libdir_pkgconfig \${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)\n";
 print OUTPUT "\n";
@@ -250,6 +257,7 @@ print OUTPUT "# \n";
 print OUTPUT "\n";
 print OUTPUT "SET(\${PROJECT_NAME}_HEADERS\n";
 print OUTPUT "$package.h\n";
+print OUTPUT "$package-API.h\n";
 print OUTPUT ")\n";
 print OUTPUT "\n";
 print OUTPUT "# Recreate correct path for the headers\n";
@@ -305,6 +313,14 @@ print OUTPUT "  PROPERTIES \n";
 print OUTPUT "  SOVERSION \${PROJECT_VERSION}\n";
 print OUTPUT "  INSTALL_RPATH \${CMAKE_INSTALL_PREFIX}/lib)\n";
 print OUTPUT "\n";
+
+print OUTPUT "SET_TARGET_PROPERTIES(\${PROJECT_NAME_LIB}\n";
+print OUTPUT "  PROPERTIES\n";
+print OUTPUT "  COMPILE_FLAGS \${\${PROJECT_NAME}_src_CXXFLAGS}\n";
+print OUTPUT "  LINK_FLAGS \${\${PROJECT_NAME}_src_LDFLAGS}\n";
+print OUTPUT ")\n";
+print OUTPUT "\n";
+
 for ($iDep=0; $iDep<$nDep; $iDep++) {
   print OUTPUT "# Add ".$dep[$iDep]." compilation flags and link to library lib".$dep[$iDep].".so\n";
   print OUTPUT "ADD_DEFINITIONS(\${_".$dep[$iDep]."_CFLAGS})\n";
@@ -312,7 +328,6 @@ for ($iDep=0; $iDep<$nDep; $iDep++) {
   print OUTPUT "\n";
 }
 print OUTPUT "INSTALL(TARGETS \${LIBRARY_NAME}\n";
-print OUTPUT "  LIBRARY\n";
 print OUTPUT "  DESTINATION \${CMAKE_INSTALL_PREFIX}/lib)\n";
 
 close(OUTPUT);
@@ -336,8 +351,7 @@ print OUTPUT ")\n";
 print OUTPUT "\n";
 print OUTPUT "\n";
 print OUTPUT "ADD_CUSTOM_COMMAND(OUTPUT \${CMAKE_CURRENT_BINARY_DIR}/html/index.html\n";
-print OUTPUT "  COMMAND \${DOXYGEN_EXECUTABLE} \${CMAKE_CURRENT_BINARY_DIR}/package.dox\n";
-print OUTPUT "  DEPENDS \"\"\n";
+print OUTPUT "  COMMAND \${DOXYGEN_EXECUTABLE} \\\"\${CMAKE_CURRENT_BINARY_DIR}/package.dox\\\"\n";
 print OUTPUT ")\n";
 print OUTPUT "\n";
 print OUTPUT "ADD_CUSTOM_TARGET(documentation ALL\n";
@@ -984,11 +998,13 @@ print OUTPUT "\n";
 print OUTPUT "\#ifndef $package"."_H\n";
 print OUTPUT "\#define $package"."_H\n";
 print OUTPUT "\n";
+print OUTPUT "\#include \"$package-API.h\"\n";
+print OUTPUT "\n";
 print OUTPUT "\/\*\*\n";
 print OUTPUT "  \\brief Main class of package $package\n";
 print OUTPUT " \*\/\n";
 print OUTPUT "\n";
-print OUTPUT "class C$package {\n";
+print OUTPUT "class $package"."_EXPORT C$package {\n";
 print OUTPUT "public:\n";
 print OUTPUT "  C$package();\n";
 print OUTPUT "  ~C$package();\n";
@@ -999,6 +1015,36 @@ print OUTPUT "\#endif\n";
 
 
 close(OUTPUT);
+
+#
+#  include/$package/$package-API.h
+#
+
+open(OUTPUT, ">"."$package\/include\/$package\/$package-API.h") or
+  die "Cannot open output file $package\/include\/$package\/$package-API.h \n";
+
+print OUTPUT "\/\*\n";
+print OUTPUT " \*  Copyright\n";
+print OUTPUT " \*\/\n";
+print OUTPUT "\n";
+print OUTPUT "\#ifndef $package"."_API_H\n";
+print OUTPUT "\#define $package"."_API_H\n";
+print OUTPUT "\n";
+print OUTPUT "\#if defined (WIN32)\n";
+print OUTPUT "\#  ifdef $package"."_EXPORTS\n";
+print OUTPUT "\#    define $package"."_EXPORT __declspec(dllexport)\n";
+print OUTPUT "\#  else\n";
+print OUTPUT "\#    define $package"."_EXPORT __declspec(dllimport)\n";
+print OUTPUT "\#  endif\n";
+print OUTPUT "\#else\n";
+print OUTPUT "\#  define $package"."_EXPORT\n";
+print OUTPUT "\#endif\n";
+print OUTPUT "\n";
+print OUTPUT "\#endif\n";
+
+
+close(OUTPUT);
+
 
 #
 #  src/$package.cpp
