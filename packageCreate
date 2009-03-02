@@ -44,8 +44,8 @@ while ($i<$#ARGV+1) {
 
   -dd docDependency
      defines a documentation dependency from this package to package docDependency. 
-     Documentation dependencies are handled by doxygen to track class inheritance between packages.\n";
-     Package docDependency should be installed and accessible from pkg-config.
+     Documentation dependencies are handled by doxygen to track class inheritance between packages.
+     Package docDependency should be installed and accessible from pkg-config.\n";
     exit;
   }
   else {
