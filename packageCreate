@@ -137,7 +137,6 @@ print OUTPUT "project(\${PROJECT_NAME})\n";
 print OUTPUT "\n";
 print OUTPUT "SET(PROJECT_VERSION 1.0)\n";
 print OUTPUT "\n";
-print OUTPUT "SET(CMAKE_BUILD_TYPE Debug)\n";
 print OUTPUT "SET(CMAKE_VERBOSE_MAKEFILE true)\n";
 print OUTPUT "\n";
 print OUTPUT "IF(WIN32)\n";
@@ -214,11 +213,11 @@ print OUTPUT "SET(install_pkg_datarootdir \"\\\${datarootdir}\")\n";
 print OUTPUT "SET(install_pkg_include_dir \"\\\${includedir}\")\n";
 print OUTPUT "\n";
 print OUTPUT "IF(UNIX)\n";
-print OUTPUT "  SET (\${\${PROJECT_NAME}}_LDFLAGS \"-Wl,-R\${install_pkg_libdir} \${LIBINCL_KW}\${PROJECT_NAME}\${LIB_EXT} \${\${\${PROJECT_NAME}}_LDFLAGS}\")\n";
+print OUTPUT "  SET (\${PROJECT_NAME}_LDFLAGS \"-Wl,-R\${install_pkg_libdir} \${LIBINCL_KW}\${PROJECT_NAME}\${LIB_EXT} \${\${PROJECT_NAME}_LDFLAGS}\")\n";
 print OUTPUT "ENDIF(UNIX)\n";
 print OUTPUT "\n";
 print OUTPUT "IF(WIN32)\n";
-print OUTPUT "  SET (\${\${PROJECT_NAME}}_LDFLAGS \"\${LIBINCL_KW}\${PROJECT_NAME}-\${PROJECT_VERSION}\${LIB_EXT} \${\${\${PROJECT_NAME}}_LDFLAGS}\")\n";
+print OUTPUT "  SET (\${PROJECT_NAME}_LDFLAGS \"\${LIBINCL_KW}\${PROJECT_NAME}\${LIB_EXT} \${\${PROJECT_NAME}_LDFLAGS}\")\n";
 print OUTPUT "ENDIF(WIN32)\n";
 print OUTPUT "\n";
 
@@ -324,9 +323,23 @@ print OUTPUT "\n";
 for ($iDep=0; $iDep<$nDep; $iDep++) {
   print OUTPUT "# Add ".$dep[$iDep]." compilation flags and link to library lib".$dep[$iDep].".so\n";
   print OUTPUT "ADD_DEFINITIONS(\${_".$dep[$iDep]."_CFLAGS})\n";
+  print OUTPUT "IF(UNIX)\n";
   print OUTPUT "TARGET_LINK_LIBRARIES(\${LIBRARY_NAME} \${_".$dep[$iDep]."_LIBRARIES})\n";
+  print OUTPUT "ENDIF(UNIX)\n";
+  print OUTPUT "\n";
+  print OUTPUT "IF(WIN32)\n";
+  print OUTPUT "foreach(dlink \${_".$dep[$iDep]."_LDFLAGS})\n";
+  print OUTPUT "	SET ( \${PROJECT_NAME}_src_LDFLAGS \"\${\${PROJECT_NAME}_src_LDFLAGS}  \${dlink}\")\n";
+  print OUTPUT "endforeach(dlink)\n";
+  print OUTPUT "ENDIF(WIN32)\n";
   print OUTPUT "\n";
 }
+
+print OUTPUT "SET_TARGET_PROPERTIES(\${LIBRARY_NAME}\n";
+print OUTPUT "  PROPERTIES\n";
+print OUTPUT "  LINK_FLAGS \"\${\${PROJECT_NAME}_src_LDFLAGS}\"\n";
+print OUTPUT ")\n";
+print OUTPUT "\n";
 print OUTPUT "INSTALL(TARGETS \${LIBRARY_NAME}\n";
 print OUTPUT "  DESTINATION \${CMAKE_INSTALL_PREFIX}/lib)\n";
 
