@@ -301,7 +301,7 @@ print OUTPUT "#  Copyright \n";
 print OUTPUT "# \n";
 print OUTPUT "\n";
 print OUTPUT "\n";
-print OUTPUT "$package"."dir = \$(datadir)/doc/$package\n";
+print OUTPUT "$package"."dir = \$(datadir)/doc/$package/html\n";
 print OUTPUT "\n";
 print OUTPUT "EXTRA_DIST = \\\n";
 print OUTPUT "\t"."header.html \\\n";
@@ -316,8 +316,7 @@ print OUTPUT "\t"."mkdir -p \$($package"."dir)\n";
 print OUTPUT "\t"."\$(INSTALL_DATA) html/\* \$($package"."dir)\n";
 print OUTPUT "\t"."mkdir -p \$($package"."dir)/pictures\n";
 print OUTPUT "\t"."\$(INSTALL_DATA) \$(srcdir)/pictures/\* \$($package"."dir)/pictures\n";
-print OUTPUT "\t"."mkdir -p \$(datadir)/doc/doxytag\n";
-print OUTPUT "\t"."\$(INSTALL_DATA) $package.doxytag \$(datadir)/doc/doxytag\n";
+print OUTPUT "\t"."\$(INSTALL_DATA) $package.doxytag \$($package"."dir)\n";
 print OUTPUT "\n";
 print OUTPUT "html-doc: package.dox\n";
 print OUTPUT "	doxygen \$<\n";
@@ -492,7 +491,7 @@ print OUTPUT "# Configuration::additions related to external references   \n";
 print OUTPUT "#---------------------------------------------------------------------------\n";
 print OUTPUT "TAGFILES               = \\\n";
 for ($iDep=0; $iDep<$nDep; $iDep++) {
-  print OUTPUT "\t"."\@$DEP[$iDep]_DOCDIR\@/$dep[$iDep].doxytag=\@$DEP[$iDep]_DOCDIR \\\n";
+  print OUTPUT "\t"."\@$DEP[$iDep]_DOCDIR\@/html/$dep[$iDep].doxytag=\@$DEP[$iDep]_DOCDIR\@/html \\\n";
 }
 for ($iDocDep=0; $iDocDep<$nDocDep; $iDocDep++) {
   print OUTPUT "\t"."\@$DOCDEP[$iDocDep]_DOCDIR\@/$docDep[$iDocDep].doxytag=\@$DOCDEP[$iDocDep]_DOCDIR \\\n";
