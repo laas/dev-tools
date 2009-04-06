@@ -15,3 +15,9 @@ AM_CPPFLAGS+=-I$(top_builddir)
 
 # Force generated files to be searched *before* source files.
 AM_CPPFLAGS += -I$(top_builddir)/src -I$(top_srcdir)/src
+
+# Search in distributed headers.
+AM_CPPFLAGS +=  -I$(top_srcdir)/include
+
+# Search in dependencies headers.
+AM_CPPFLAGS += &PKG_DEPS_CFLAGS&

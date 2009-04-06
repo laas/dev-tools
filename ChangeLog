@@ -1,3 +1,10 @@
+2009/04/06
+	11. Fixed dependency management.
+	10. Reorganization of the script
+	  1. template-project directory stores files intended to be copied
+            and substituted.
+          2. better use of autotools.
+
 2008/05/19
 	9. Remove obsolete doxygen directives.
 	

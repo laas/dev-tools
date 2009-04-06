@@ -13,18 +13,19 @@ EXTRA_DIST = bootstrap deps.ac
 all:
 
 # Pkg-config generation
-PKG_CONFIG_FILE = @PACKAGE_TARNAME@-@PACKAGE_VERSION@.pc
+PKG_CONFIG_FILE = @PACKAGE_TARNAME@.pc
 PKG_DIR="$(DESTDIR)$(libdir)/pkg-config/"
 
-edit = sed -e "s|@prefix@$(prefix)||" \
-	   -e 's,@exec_prefix@,$(exec_prefix),g' \
-	   -e 's,@libdir@,$(libdir),g' \
-	   -e 's,@includedir@,$(includedir),g' \
-	   -e 's,@datarootdir@,$(datarootdir),g' \
-	   -e 's,@PACKAGE@,$(PACKAGE),g' \
-	   -e 's,@VERSION@,$(PACKAGE_VERSION),g'
+edit = sed -e "s|@prefix\@|$(prefix)|" \
+	   -e 's,@exec_prefix\@,$(exec_prefix),g' \
+	   -e 's,@libdir\@,$(libdir),g' \
+	   -e 's,@includedir\@,$(includedir),g' \
+	   -e 's,@datarootdir\@,$(datarootdir),g' \
+	   -e 's,@PACKAGE\@,$(PACKAGE),g' \
+	   -e 's,@PACKAGE_TARNAME\@,$(PACKAGE_TARNAME),g' \
+	   -e 's,@VERSION\@,$(PACKAGE_VERSION),g'
 
-@PACKAGE_TARNAME@-@PACKAGE_VERSION@.pc: $(srcdir)/build-aux/pkg-config.pc.in
+@PACKAGE_TARNAME@.pc: $(srcdir)/build-aux/pkg-config.pc.in
 	$(edit) $(srcdir)/build-aux/pkg-config.pc.in >$@
 
 EXTRA_DIST += build-aux/pkg-config.pc.in
@@ -33,7 +34,7 @@ CLEANFILES = $(PKG_CONFIG_FILE)
 install-data-local: install-pkg-config
 uninstall-local: uninstall-pkg-config
 
-install-pkg-config: $(PACKAGE_TARNAME)-$(PACKAGE_VERSION).pc
+install-pkg-config: $(PACKAGE_TARNAME).pc
 	$(MKDIR_P) $(PKG_DIR)
 	cp "$(PKG_CONFIG_FILE)" $(PKG_DIR)
 
@@ -45,3 +46,10 @@ uninstall-pkg-config:
 .PHONY: doc html
 doc html:
 	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
+
+# -- Distribute and install headers
+headerdir = ${prefix}/include/&PACKAGE_TARNAME&
+header_DATA =					\
+		include/&PACKAGE_TARNAME&/fwd.hh\
+		include/&PACKAGE_TARNAME&/&PACKAGE_TARNAME&.hh
+

@@ -22,7 +22,7 @@
  * \brief Implementation of &PACKAGE_TARNAME_CC&.
  */
 
-#include "&PACKAGE_TARNAME_LC&.hh"
+#include "&PACKAGE_TARNAME_LC&/&PACKAGE_TARNAME_LC&.hh"
 
 namespace &PACKAGE_TARNAME_CC&
 {

@@ -16,8 +16,6 @@
 // along with &PACKAGE_TARNAME&.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * \file src/fwd.hh
- *
  * \brief Forward declarations.
  */
 

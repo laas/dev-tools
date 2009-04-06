@@ -5,7 +5,7 @@ AC_PREREQ([2.59])
 ## --------------------- ##
 ## Package configuration ##
 ## --------------------- ##
-AC_INIT([&PACKAGE&], [0.1], [&EMAIL&],
+AC_INIT([&PACKAGE_NAME&], [0.1], [&EMAIL&],
              [&PACKAGE_TARNAME&])
 
 # Auxiliary files.
@@ -75,6 +75,9 @@ AC_CONFIG_FILES([
     tests/atlocal
     tests/package.m4
 ])
+
+# Generate Doxyfile.
+AC_CONFIG_FILES([doc/Doxyfile])
 
 # Write files.
 AC_OUTPUT

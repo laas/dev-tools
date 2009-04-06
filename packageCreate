@@ -144,6 +144,31 @@ $mon += 1;
 
 my $DATE="$year-$mon-$mday";
 my $PKG_DEPS = join(", ", @dep);
+my $PKG_DOCDEPS = "";
+my $PKG_DEPS_CFLAGS = "";
+
+# Generate PKG_DOCDEPS
+for ($iDep=0; $iDep<scalar(@dep); $iDep++) {
+  my $dd = $dep[$iDep];
+  $D = uc ($dd);
+  $d = lc ($dd);
+  $PKG_DOCDEPS = $PKG_DOCDEPS."\@$D\_DOCDIR\@/html/$dd.doxytag=\@$D\_DOCDIR\@/html ";
+}
+
+for ($iDep=0; $iDep<scalar(@docdep); $iDep++) {
+  my $dd = $docdep[$iDep];
+  $D = uc ($dd);
+  $d = lc ($dd);
+  $PKG_DOCDEPS = $PKG_DOCDEPS."\@$D\_DOCDIR\@/html/$dd.doxytag=\@$D\_DOCDIR\@/html ";
+}
+
+# Generate PKG_DEPS_CFLAGS
+for ($iDep=0; $iDep<scalar(@dep); $iDep++) {
+  my $dd = $dep[$iDep];
+  $D = uc ($dd);
+  $PKG_DEPS_CFLAGS = $PKG_DEPS_CFLAGS."\$($D\_CFLAGS) ";
+}
+
 
 my $sed_args = "-e 's,&PACKAGE_TARNAME&,$package_lc,g' \\
                 -e 's,&PACKAGE_TARNAME_LC&,$package_lc,g' \\
@@ -151,6 +176,8 @@ my $sed_args = "-e 's,&PACKAGE_TARNAME&,$package_lc,g' \\
                 -e 's,&PACKAGE_TARNAME_CC&,$package_cc,g' \\
                 -e 's,&PACKAGE_NAME&,$pkg,g' \\
                 -e 's|&PKG_DEPS&|$PKG_DEPS|g' \\
+                -e 's|&PKG_DOCDEPS&|$PKG_DOCDEPS|g' \\
+                -e 's|&PKG_DEPS_CFLAGS&|$PKG_DEPS_CFLAGS|g' \\
                 -e 's,&FULLNAME&,$FULLNAME,g' \\
                 -e 's,&EMAIL&,$EMAIL,g' \\
                 -e 's,&DATE&,$DATE,g'";
@@ -160,7 +187,8 @@ system("find $package_lc -type f -print0 | xargs -0 sed -i $sed_args \n");
 
 # Move sample C++ source/header file.
 system("mv $package_lc/src/package.cc $package_lc/src/$package_lc.cc");
-system("mv $package_lc/src/package.hh $package_lc/src/$package_lc.hh");
+system("mv $package_lc/include/package/package.hh $package_lc/include/package/$package_lc.hh");
+system("mv $package_lc/include/package $package_lc/include/$package_lc");
 
 ############################
 # Print user instructions. #

@@ -3,11 +3,11 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 datarootdir=@datarootdir@
-docdir=@datadir@/doc/@PACKAGE_TARNAME@
+docdir=@datarootdir@/doc/@PACKAGE_TARNAME@
 
 Name: @PACKAGE@
 Description:
 Version: @VERSION@
-Requires: @REQUIRES@
-Libs: -L${libdir} -l@PACKAGE_TARNAME@ &PKG_DEPS&
+Requires: &PKG_DEPS&
+Libs: -Wl,-R${libdir} -L${libdir} -l@PACKAGE_TARNAME@
 Cflags: -I${includedir}

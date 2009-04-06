@@ -15,25 +15,30 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with &PACKAGE_TARNAME&.  If not, see <http://www.gnu.org/licenses/>.
 
+
 /**
- * \file src/doc.hh
- *
- * \brief Main documentation header.
+ * \brief Declaration of &PACKAGE_TARNAME_CC&.
  */
 
-/**
+#ifndef &PACKAGE_TARNAME_UC&_&PACKAGE_TARNAME_UC&_HH_
+# define &PACKAGE_TARNAME_UC&_&PACKAGE_TARNAME_UC&_HH_
 
-   \mainpage
+namespace &PACKAGE_TARNAME_CC&
+{
+  /// \brief This class has been generated automatically
+  /// See Doxygen documentation to learn how to document your classes:
+  /// http://www.stack.nl/~dimitri/doxygen/
+  class &PACKAGE_TARNAME_CC&
+  {
+  public:
+    /// Main constructor.
+    &PACKAGE_TARNAME_CC& ();
+    /// Destructor.
+    ~&PACKAGE_TARNAME_CC& ();
 
-   \section intro Introduction
+    //FIXME: more here.
+  };
 
-   FIXME: Document here.
-*/
+}; // end of namespace &PACKAGE_TARNAME_CC&.
 
-/*!
-  \namespace &PACKAGE_TARNAME_CC&
-
-  \brief Main namespace
-
-  The namespace gathers all the classes of this library.
-*/
+#endif //! &PACKAGE_TARNAME_UC&_&PACKAGE_TARNAME_UC&_HH_
