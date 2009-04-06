@@ -29,6 +29,7 @@ use Env qw(EMAIL FULLNAME);
 
 my ($pkg, $print_version, $print_help, @dep, @docdep);
 my $usage = "packageCreate -p <packageName> -d dependency -dd docDependency";
+my $version = "1.1.0";
 
 usage() if !GetOptions("version|v"   => \$print_version,
                        "help|h"      => \$print_help,
@@ -178,6 +179,7 @@ my $sed_args = "-e 's,&PACKAGE_TARNAME&,$package_lc,g' \\
                 -e 's|&PKG_DEPS&|$PKG_DEPS|g' \\
                 -e 's|&PKG_DOCDEPS&|$PKG_DOCDEPS|g' \\
                 -e 's|&PKG_DEPS_CFLAGS&|$PKG_DEPS_CFLAGS|g' \\
+                -e 's,&VERSION&,$version,g' \\
                 -e 's,&FULLNAME&,$FULLNAME,g' \\
                 -e 's,&EMAIL&,$EMAIL,g' \\
                 -e 's,&DATE&,$DATE,g'";

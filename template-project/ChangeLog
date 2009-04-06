@@ -27,5 +27,4 @@
 	* build-aux/autotest.mk,
 	* build-aux/init.mk,
 	* build-aux/warning.m4,
-	* build-aux/pkg-config.pc.in: Package creation (with
-	packageCreate).
+	* build-aux/pkg-config.pc.in: Package creation (with packageCreate &VERSION&).
