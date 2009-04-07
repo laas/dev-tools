@@ -38,7 +38,7 @@ usage() if !GetOptions("version|v"   => \$print_version,
                        "docdep|dd:s"  => \@docdep);
 
 if ($print_version) {
-    print "packageCreate v0.2\n";
+    print "packageCreate version $version\n";
     exit;
 }
 
