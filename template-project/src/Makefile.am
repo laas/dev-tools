@@ -6,5 +6,4 @@ AM_CXXFLAGS += $(WARNING_CXXFLAGS)
 lib_LTLIBRARIES = lib&PACKAGE_TARNAME&.la
 
 lib&PACKAGE_TARNAME&_la_SOURCES = 			\
-				doc.hh			\
 				&PACKAGE_TARNAME&.cc
