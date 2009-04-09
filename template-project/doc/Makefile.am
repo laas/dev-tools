@@ -8,6 +8,7 @@ html-local: Doxyfile
 	$(DOXYGEN)
 
 EXTRA_DIST = Doxyfile.in header.html footer.html package.css additionalDoc/doc.hh
+CLEANFILES = $(PACKAGE_TARNAME).doxytag
 
 clean-local:
 	rm -rf html latex
