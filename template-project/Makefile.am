@@ -4,6 +4,7 @@ ACLOCAL_AMFLAGS = -I build-aux
 SUBDIRS = 		\
 	doc		\
 	src		\
+	include		\
 	tests
 
 # Provide bootstrap and deps.ac with the generated package.
@@ -46,10 +47,3 @@ uninstall-pkg-config:
 .PHONY: doc html
 doc html:
 	cd doc && $(MAKE) $(AM_MAKEFLAGS) $@
-
-# -- Distribute and install headers
-headerdir = ${prefix}/include/&PACKAGE_TARNAME&
-header_DATA =					\
-		include/&PACKAGE_TARNAME&/fwd.hh\
-		include/&PACKAGE_TARNAME&/&PACKAGE_TARNAME&.hh
-

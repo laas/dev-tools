@@ -69,6 +69,7 @@ AC_CONFIG_HEADERS([config.h])
 # Create Makefiles.
 AC_CONFIG_FILES([
   Makefile
+   include/Makefile
    src/Makefile
    doc/Makefile
    tests/Makefile
