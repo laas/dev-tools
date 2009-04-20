@@ -1,0 +1,104 @@
+#! /usr/bin/perl  --                                                                                -*-perl-*-
+
+##########
+# README #
+##########
+#
+# This scripts allows automatic extraction of package dependencies
+# It is a perl script. To use it:
+# $ chmod u+x packageDep 
+# $ cd /tmp && /path/to/packageDep -p foo
+#
+# It will create a text file in /tmp/foo.
+
+use strict;
+use warnings;
+use Getopt::Long;
+
+my ($pkg, $print_version, $print_help);
+my $usage = "packageDep -p <packageName> -d dependency -dd docDependency";
+my $version = "0.1";
+
+my $number = '-?\d+\.?\d*[eE]?-?\d*';
+my $versionNumber = '\d+\..*';
+my $name = '[\w\d\.\/_-]+';
+
+usage() if !GetOptions("version|v"   => \$print_version,
+                       "help|h"      => \$print_help,
+                       "package|p=s" => \$pkg);
+
+if ($print_version) {
+    print "packageDep version $version\n";
+    exit;
+}
+
+if ($print_help) {
+    print "$usage\n
+  Generate a text file describing the dependencies of a package
+
+  --version|-v
+     print version information.
+
+  --help|-?
+    print help.\n";
+    exit;
+}
+
+sub usage {
+    print "Unknown option: @_\n" if ( @_ );
+    print "$usage\n";
+    print "Use --help for additional information.\n";
+    exit;
+}
+
+
+my $pkgConfigPath = $ENV{"PKG_CONFIG_PATH"};
+print $pkgConfigPath."\n";
+
+my @path = split(/:/, $pkgConfigPath);
+my $key;
+my $value;
+
+#
+#  Loop over each path of PKG_CONFIG_PATH
+#
+
+sub extractDep {
+  my $found=0;
+  my @dep;
+  for (my $i=0; $i < scalar(@path); $i++) {
+    my $filePc = "$path[$i]/$_[0].pc";
+
+    if (open(INPUT, $filePc)) {
+#      print "$filePc\n";
+      while (<INPUT>) {
+	if ((/^(\s*Requires:\s+)(.+)/)) {
+	  my $line = $2;
+	  @dep = split(/,/, $line);
+	  $found=1;
+	  for (my $j=0; $j < scalar(@dep); $j++) {
+	    #	  print "$dep[$j]\n";
+	    if (($dep[$j] =~ (/^\s*($name)\s+>=\s+($versionNumber)/)) ||
+		($dep[$j] =~ (/^\s*($name)\s*/))) {
+	      $dep[$j] = $1;
+	    }
+	    else {
+	      $dep[$j] = "";
+	    }
+	  }
+	}
+      }
+      close(INPUT);
+    }
+    if ($found) {
+      for (my $j=0; $j < scalar(@dep); $j++) {
+	if ($dep[$j] ne "") {
+	  print "$dep[$j] -> $_[0]\n";
+	  extractDep($dep[$j]);
+	}
+      }
+    }
+  }
+}
+
+extractDep ($pkg);
