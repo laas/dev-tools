@@ -15,17 +15,21 @@ use strict;
 use warnings;
 use Getopt::Long;
 
-my ($pkg, $print_version, $print_help);
-my $usage = "packageDep -p <packageName> -d dependency -dd docDependency";
+my ($pkg, $outputFile, $print_version, $print_help);
+my $usage = "packageDep -p <packageName> -o <outputFile>";
 my $version = "0.1";
 
 my $number = '-?\d+\.?\d*[eE]?-?\d*';
 my $versionNumber = '\d+\..*';
 my $name = '[\w\d\.\/_-]+';
 
+$pkg="";
+$outputFile="";
+
 usage() if !GetOptions("version|v"   => \$print_version,
                        "help|h"      => \$print_help,
-                       "package|p=s" => \$pkg);
+                       "package|p=s" => \$pkg,
+                       "output|o=s" => \$outputFile);
 
 if ($print_version) {
     print "packageDep version $version\n";
@@ -53,37 +57,51 @@ sub usage {
 
 
 my $pkgConfigPath = $ENV{"PKG_CONFIG_PATH"};
-print $pkgConfigPath."\n";
 
 my @path = split(/:/, $pkgConfigPath);
 my $key;
 my $value;
 
+# Gather all packages in this array to avoid handling them several times.
+my %allPkg;
+$allPkg{"$pkg"} = $pkg;
+
+# Gather all dependencies in this array to avoid hanlding them several times.
+my %allDep;
+my ($i, $j);
+
 #
 #  Loop over each path of PKG_CONFIG_PATH
 #
 
+my %dep2;
+
 sub extractDep {
+  my $argument = $_[0];
+  print "Scanning $argument\n";
   my $found=0;
   my @dep;
-  for (my $i=0; $i < scalar(@path); $i++) {
-    my $filePc = "$path[$i]/$_[0].pc";
+
+  for ($i=0; $i < scalar(@path); $i++) {
+    my $filePc = "$path[$i]/$argument.pc";
 
     if (open(INPUT, $filePc)) {
-#      print "$filePc\n";
       while (<INPUT>) {
 	if ((/^(\s*Requires:\s+)(.+)/)) {
 	  my $line = $2;
 	  @dep = split(/,/, $line);
 	  $found=1;
-	  for (my $j=0; $j < scalar(@dep); $j++) {
-	    #	  print "$dep[$j]\n";
+	  for ($j=0; $j < scalar(@dep); $j++) {
 	    if (($dep[$j] =~ (/^\s*($name)\s+>=\s+($versionNumber)/)) ||
 		($dep[$j] =~ (/^\s*($name)\s*/))) {
-	      $dep[$j] = $1;
+	      $dep2{$argument}[$j] = $1;
+	      print "  $dep2{$argument}[$j]\n";
+	      my $tmpDep = "$1 -> $argument";
+	      $allPkg{$1} = $1;
+	      $allDep{$tmpDep} = $tmpDep;
 	    }
 	    else {
-	      $dep[$j] = "";
+	      $dep2{$argument}[$j] = "";
 	    }
 	  }
 	}
@@ -91,14 +109,46 @@ sub extractDep {
       close(INPUT);
     }
     if ($found) {
-      for (my $j=0; $j < scalar(@dep); $j++) {
-	if ($dep[$j] ne "") {
-	  print "$dep[$j] -> $_[0]\n";
-	  extractDep($dep[$j]);
+      my @tmpArray = $dep2{$argument};
+      print "$tmpArray[0]\n";
+      my $sizeDep2=scalar($dep2{$argument});
+      print "size of dep2 = $sizeDep2\n";
+      exit;
+      for ($j=0; $j < $sizeDep2; $j++) {
+	print "j= $j\n";
+	if ($dep2{$argument}[$j] ne "") {
+	  extractDep($dep2{$argument}[$j]);
 	}
       }
     }
   }
 }
 
+#
+# Recursively extract packages and dependencies
+#
 extractDep ($pkg);
+
+#
+# Parse array of packages and dependencies
+#
+open(OUTPUT, ">".$outputFile) or die ("cannot open $outputFile");
+
+print OUTPUT "digraph CD  {\n";
+print OUTPUT "\tsize = \"12,15\"\n";
+print OUTPUT "\trankdir = BT\n";
+print OUTPUT "\tcompound=true\n";
+print OUTPUT "\n";
+
+my @packages = keys(%allPkg);
+my @dependencies = keys(%allDep);
+
+for ($i=0; $i<scalar(@packages); $i++) {
+  print OUTPUT "\t$packages[$i] [shape = box]\n";
+}
+
+for ($i=0; $i<scalar(@dependencies); $i++) {
+  print OUTPUT "\t$dependencies[$i]\n";
+}
+
+print OUTPUT "}\n";
