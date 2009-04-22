@@ -9,20 +9,18 @@ from optparse import OptionParser
 pkgConfigPath = os.environ.get("PKG_CONFIG_PATH")
 pathList = re.split(':', pkgConfigPath)
 
-parser = OptionParser(version="packageDep 0.1")
+usage = "usage: %prog [options] package-1 ... package-n"
+parser = OptionParser(version="packageDep 0.1", usage=usage)
 
 parser.add_option("-o", "--ouput", dest="filename",
                   help="write graph to FILE", metavar="FILE")
 
-parser.add_option("-p", "--package", dest="pkg",
-                  help="package to parse", metavar="pkg")
-
 (options, args) = parser.parse_args()
 
-if options.filename is None or options.pkg is None:
+if options.filename is None:
     parser.print_help()
 
-pkg = options.pkg
+packageList = args
 filename = options.filename
 
 requireExpr = re.compile('(\s*Requires:\s+)(.+)')
@@ -65,7 +63,8 @@ def extractDep(inPkg):
         print "extracting ", dep
         extractDep(dep)
 
-extractDep(pkg)
+for pkg in packageList:
+    extractDep(pkg)
 
 #
 # Extract data from package and dependency sets
