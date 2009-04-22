@@ -6,7 +6,7 @@
 #
 # This scripts allows automatic extraction of package dependencies
 # It is a perl script. To use it:
-# $ chmod u+x packageDep 
+# $ chmod u+x packageDep
 # $ cd /tmp && /path/to/packageDep -p foo
 #
 # It will create a text file in /tmp/foo.
@@ -30,6 +30,10 @@ usage() if !GetOptions("version|v"   => \$print_version,
                        "help|h"      => \$print_help,
                        "package|p=s" => \$pkg,
                        "output|o=s" => \$outputFile);
+
+if ($pkg eq '') {
+    usage ();
+}
 
 if ($print_version) {
     print "packageDep version $version\n";
@@ -74,13 +78,13 @@ my ($i, $j);
 #  Loop over each path of PKG_CONFIG_PATH
 #
 
-my %dep2;
-
 sub extractDep {
   my $argument = $_[0];
-  print "Scanning $argument\n";
   my $found=0;
   my @dep;
+  my @dep2;
+
+  print "Scanning $argument\n";
 
   for ($i=0; $i < scalar(@path); $i++) {
     my $filePc = "$path[$i]/$argument.pc";
@@ -94,14 +98,14 @@ sub extractDep {
 	  for ($j=0; $j < scalar(@dep); $j++) {
 	    if (($dep[$j] =~ (/^\s*($name)\s+>=\s+($versionNumber)/)) ||
 		($dep[$j] =~ (/^\s*($name)\s*/))) {
-	      $dep2{$argument}[$j] = $1;
-	      print "  $dep2{$argument}[$j]\n";
+	      $dep2[$j] = $1;
+	      print "  $dep2[$j]\n";
 	      my $tmpDep = "$1 -> $argument";
 	      $allPkg{$1} = $1;
 	      $allDep{$tmpDep} = $tmpDep;
 	    }
 	    else {
-	      $dep2{$argument}[$j] = "";
+	      $dep2[$j] = "";
 	    }
 	  }
 	}
@@ -109,19 +113,17 @@ sub extractDep {
       close(INPUT);
     }
     if ($found) {
-      my @tmpArray = $dep2{$argument};
-      print "$tmpArray[0]\n";
-      my $sizeDep2=scalar($dep2{$argument});
+      my $sizeDep2=scalar(@dep2);
       print "size of dep2 = $sizeDep2\n";
-      exit;
       for ($j=0; $j < $sizeDep2; $j++) {
-	print "j= $j\n";
-	if ($dep2{$argument}[$j] ne "") {
-	  extractDep($dep2{$argument}[$j]);
+	if ($dep2[$j] ne "") {
+	    my @newDeps = extractDep($dep2[$j]);
+	    push(@dep2, @newDeps);
 	}
       }
     }
   }
+  return @dep2;
 }
 
 #
