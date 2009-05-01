@@ -1,3 +1,12 @@
+2009-05-01  Florent Lamiraux  <florent@laas.fr>
+
+	Enhance package construction.
+	* template-project/configure.ac: 
+	Check that doxygen is installed,
+	search for mkdir and sed
+	* template-project/doc/Makefile.am: .
+	replace MKDIR_P by mkdir_p for better portability 
+
 2009/04/23
 	14. packageDep can display several packages in one output.
 

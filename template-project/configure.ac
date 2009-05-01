@@ -44,6 +44,13 @@ JRL_CXX_WARNINGS([[-Wall],
 ## Additionnal tools.  ##
 ## ------------------- ##
 
+# Search for misc. common tools.
+AC_PROG_MKDIR_P
+AC_PROG_SED
+
+AC_ARG_VAR([DOXYGEN], [the Doxygen documentation generation program])
+AC_CHECK_PROGS([DOXYGEN], [doxygen])
+
 # Search for Libtool.
 AC_CONFIG_MACRO_DIR([build-aux])
 AC_PROG_LIBTOOL
