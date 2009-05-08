@@ -1,3 +1,9 @@
+2009-05-08  Florent Lamiraux  <florent@laas.fr>
+
+	Add linking flags in src/Makefile.am.
+	* packageCreate: 
+	* template-project/src/Makefile.am: 
+
 2009-05-01  Florent Lamiraux  <florent@laas.fr>
 
 	Enhance package construction.

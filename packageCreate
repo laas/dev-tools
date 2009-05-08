@@ -147,6 +147,7 @@ my $DATE="$year-$mon-$mday";
 my $PKG_DEPS = join(", ", @dep);
 my $PKG_DOCDEPS = "";
 my $PKG_DEPS_CFLAGS = "";
+my $PKG_DEPS_LIBS = "";
 
 # Generate PKG_DOCDEPS
 for ($iDep=0; $iDep<scalar(@dep); $iDep++) {
@@ -170,6 +171,13 @@ for ($iDep=0; $iDep<scalar(@dep); $iDep++) {
   $PKG_DEPS_CFLAGS = $PKG_DEPS_CFLAGS."\$($D\_CFLAGS) ";
 }
 
+# Generate PKG_DEPS_LIBS
+for ($iDep=0; $iDep<scalar(@dep); $iDep++) {
+  my $dd = $dep[$iDep];
+  $D = uc ($dd);
+  $PKG_DEPS_LIBS = $PKG_DEPS_LIBS."\$($D\_LIBS) ";
+}
+
 
 my $sed_args = "-e 's,&PACKAGE_TARNAME&,$package_lc,g' \\
                 -e 's,&PACKAGE_TARNAME_LC&,$package_lc,g' \\
@@ -179,6 +187,7 @@ my $sed_args = "-e 's,&PACKAGE_TARNAME&,$package_lc,g' \\
                 -e 's|&PKG_DEPS&|$PKG_DEPS|g' \\
                 -e 's|&PKG_DOCDEPS&|$PKG_DOCDEPS|g' \\
                 -e 's|&PKG_DEPS_CFLAGS&|$PKG_DEPS_CFLAGS|g' \\
+                -e 's|&PKG_DEPS_LIBS&|$PKG_DEPS_LIBS|g' \\
                 -e 's,&VERSION&,$version,g' \\
                 -e 's,&FULLNAME&,$FULLNAME,g' \\
                 -e 's,&EMAIL&,$EMAIL,g' \\
