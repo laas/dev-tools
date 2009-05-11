@@ -1,3 +1,9 @@
+2009-05-11  Thomas Moulard  <thomas.moulard@gmail.com>
+
+	Replace MKDIR_P by mkdir_p.
+	MKDIR_P is not always defined, use mkdir_p instead.
+	* template-project/Makefile.am: Here.
+
 2009-05-08  Florent Lamiraux  <florent@laas.fr>
 
 	Add linking flags in src/Makefile.am.
