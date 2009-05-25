@@ -1,3 +1,8 @@
+2009-05-25  Florent Lamiraux  <florent@laas.fr>
+
+	Removed trailing backslash in Makefile.
+	* template-project/src/Makefile.am: here
+
 2009-05-11  Thomas Moulard  <thomas.moulard@gmail.com>
 
 	Replace MKDIR_P by mkdir_p.
