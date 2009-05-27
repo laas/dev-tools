@@ -10,8 +10,8 @@ SUBDIRS = 		\
 # Provide bootstrap and deps.ac with the generated package.
 EXTRA_DIST = bootstrap deps.ac
 
-# Nothing to do in this directory.
-all:
+# By default, only generate the pkg-config file.
+all: @PACKAGE_TARNAME@.pc
 
 # Pkg-config generation
 PKG_CONFIG_FILE = @PACKAGE_TARNAME@.pc
@@ -26,7 +26,7 @@ edit = sed -e "s|@prefix\@|$(prefix)|" \
 	   -e 's,@PACKAGE_TARNAME\@,$(PACKAGE_TARNAME),g' \
 	   -e 's,@VERSION\@,$(PACKAGE_VERSION),g'
 
-@PACKAGE_TARNAME@.pc: $(srcdir)/build-aux/pkg-config.pc.in
+@PACKAGE_TARNAME@.pc: $(builddir)/Makefile $(srcdir)/build-aux/pkg-config.pc.in
 	$(edit) $(srcdir)/build-aux/pkg-config.pc.in >$@
 
 EXTRA_DIST += build-aux/pkg-config.pc.in
