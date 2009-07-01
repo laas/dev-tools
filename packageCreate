@@ -1123,6 +1123,9 @@ print OUTPUT "Options:\n";
 print OUTPUT "\n";
 print OUTPUT "-DCMAKE_INSTALL_PREFIX=...\n";
 print OUTPUT "  specifies the directory where to install the package.\n";
+print OUTPUT "\n";
+print OUTPUT "-DCMAKE_BUILD_TYPE=[none|debug|release|relwithdebinfo|MinSizeRel]\n";
+print OUTPUT "  specifies to type of compilation (release, debug, ...)\n";
 
 close(OUTPUT);
 
