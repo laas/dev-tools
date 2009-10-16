@@ -1,0 +1,7 @@
+Makefile.in
+*~
+configure
+_build/
+aclocal.m4
+autom4te.cache/
+testsuite

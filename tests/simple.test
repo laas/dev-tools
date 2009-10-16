@@ -1,0 +1,11 @@
+#! /bin/sh
+
+echo "Generate package..."
+packageCreate -p testpkg
+cd testpkg
+echo "Bootstrap..."
+./bootstrap
+echo "Configure..."
+./configure
+echo "Distcheck..."
+make distcheck

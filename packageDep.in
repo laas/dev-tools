@@ -10,7 +10,7 @@ pkgConfigPath = os.environ.get("PKG_CONFIG_PATH")
 pathList = re.split(':', pkgConfigPath)
 
 usage = "usage: %prog [options] package-1 ... package-n"
-parser = OptionParser(version="packageDep 0.1", usage=usage)
+parser = OptionParser(version="packageDep version @VERSION@", usage=usage)
 
 parser.add_option("-o", "--ouput", dest="filename",
                   help="write graph to FILE", metavar="FILE")

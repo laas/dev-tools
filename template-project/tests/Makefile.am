@@ -38,7 +38,7 @@ generate-reference: $(check_PROGRAMS)
 # Test suite.  #
 # ------------ #
 
-TESTSUITE_AT =					\
+TESTSUITE_AT +=					\
 	simple-test.at
 
 # Distribute reference files.

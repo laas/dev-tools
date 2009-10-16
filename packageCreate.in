@@ -22,6 +22,16 @@ use Getopt::Long;
 use FindBin qw($Bin);
 use Env qw(EMAIL FULLNAME);
 
+# Search for the template-project directory.
+my $tplProjectDir = "";
+
+if (defined($ENV{PACKAGECREATE_SHAREDIR})) {
+    $tplProjectDir = $ENV{PACKAGECREATE_SHAREDIR};
+} else {
+    $tplProjectDir = "@prefix@/share/@PACKAGE_TARNAME@";
+}
+$tplProjectDir = $tplProjectDir."/template-project";
+
 
 #######################
 # Parse command line. #
@@ -29,7 +39,7 @@ use Env qw(EMAIL FULLNAME);
 
 my ($pkg, $print_version, $print_help, @dep, @docdep);
 my $usage = "packageCreate -p <packageName> -d dependency -dd docDependency";
-my $version = "1.1.0";
+my $version = "@PACKAGE_VERSION@";
 
 usage() if !GetOptions("version|v"   => \$print_version,
                        "help|h"      => \$print_help,
@@ -105,7 +115,7 @@ if (-d $package_lc) {
 # Generate package. #
 #####################
 # Copy template into specified location.
-system("cp -Rf $Bin/template-project $package_lc");
+system("cp -Rf $tplProjectDir $package_lc");
 
 # Generate deps.ac
 open(OUTPUT, ">"."$package_lc/deps.ac") or
