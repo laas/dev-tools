@@ -28,7 +28,7 @@ This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.])
 
 AT_SETUP([Simple])
-AT_CHECK([simple.test])
+AT_CHECK([simple.test], [0], [ignore], [ignore])
 AT_CLEANUP
 
 # End of testsuite.at

@@ -17,6 +17,8 @@
 
 #include "common.hh"
 
+int run_test ();
+
 int run_test ()
 {
   //FIXME: make a real test.
