@@ -126,26 +126,41 @@ for ($iDep = 0; $iDep< scalar(@dep); $iDep++) {
     $D = uc ($dep[$iDep]);
     $d = lc ($dep[$iDep]);
 
-    print OUTPUT  "PKG_CHECK_MODULES([$D], [$d])\n";
-    print OUTPUT  "$D\_PREFIX=\`\$PKG_CONFIG $d --variable=prefix\`\n";
-    print OUTPUT  "$D\_DOCDIR=\`\$PKG_CONFIG $d --variable=docdir\`\n";
+    print OUTPUT  "m4_define([$d"."_reqd], [$dep[$iDep] >= 0.1])\n";
+    print OUTPUT  "AC_SUBST([$D"."_REQD], [\"$d"."_reqd\"])\n";
+    print OUTPUT  "PKG_CHECK_MODULES([$D], [$d"."_reqd])\n";
+    print OUTPUT  "$D\_PREFIX=\`\$PKG_CONFIG $dep[$iDep] --variable=prefix\`\n";
+    print OUTPUT  "$D\_DOCDIR=\`\$PKG_CONFIG $dep[$iDep] --variable=docdir\`\n";
     print OUTPUT  "AC_SUBST([$D\_CFLAGS])\n";
     print OUTPUT  "AC_SUBST([$D\_LIBS])\n";
     print OUTPUT  "AC_SUBST([$D\_PREFIX])\n";
     print OUTPUT  "AC_SUBST([$D\_DOCDIR])\n";
     print OUTPUT  "\n";
+
 }
 
 for ($iDep = 0; $iDep< scalar(@docdep); $iDep++) {
     $D = uc ($docdep[$iDep]);
     $d = lc ($docdep[$iDep]);
-    print OUTPUT  "PKG_CHECK_MODULES([$D], [$d])\n";
-    print OUTPUT  "$D\_PREFIX=\`\$PKG_CONFIG $d --variable=prefix\`\n";
-    print OUTPUT  "$D\_DOCDIR=\`\$PKG_CONFIG $d --variable=docdir\`\n";
+    print OUTPUT  "PKG_CHECK_MODULES([$D], [$docdep[$iDep]])\n";
+    print OUTPUT  "$D\_PREFIX=\`\$PKG_CONFIG $docdep[$iDep] --variable=prefix\`\n";
+    print OUTPUT  "$D\_DOCDIR=\`\$PKG_CONFIG $docdep[$iDep] --variable=docdir\`\n";
     print OUTPUT  "AC_SUBST([$D\_PREFIX])\n";
     print OUTPUT  "AC_SUBST([$D\_DOCDIR])\n";
     print OUTPUT  "\n";
 }
+
+print OUTPUT  "AC_SUBST([PKGCONFIG_REQUIRES], [\"";
+for ($iDep = 0; $iDep< scalar(@dep); $iDep++) {
+    $D = uc ($dep[$iDep]);
+    $d = lc ($dep[$iDep]);
+    print OUTPUT  "$d"."_reqd";
+    if ($iDep < scalar(@dep)-1) {
+	print OUTPUT ", ";
+    }
+}
+print OUTPUT  "\"])\n";
+
 close(OUTPUT);
 
 # Generate sed arguments.
