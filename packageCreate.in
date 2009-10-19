@@ -143,10 +143,12 @@ for ($iDep = 0; $iDep< scalar(@dep); $iDep++) {
     print OUTPUT  "PKG_CHECK_MODULES([$D], [$d"."_reqd])\n";
     print OUTPUT  "$D\_PREFIX=\`\$PKG_CONFIG $dep[$iDep] --variable=prefix\`\n";
     print OUTPUT  "$D\_DOCDIR=\`\$PKG_CONFIG $dep[$iDep] --variable=docdir\`\n";
+    print OUTPUT  "$D\_DOXYGENDOCDIR=\`\$PKG_CONFIG $dep[$iDep] --variable=doxygendocdir\`\n";
     print OUTPUT  "AC_SUBST([$D\_CFLAGS])\n";
     print OUTPUT  "AC_SUBST([$D\_LIBS])\n";
     print OUTPUT  "AC_SUBST([$D\_PREFIX])\n";
     print OUTPUT  "AC_SUBST([$D\_DOCDIR])\n";
+    print OUTPUT  "AC_SUBST([$D\_DOXYGENDOCDIR])\n";
     print OUTPUT  "\n";
 
 }
@@ -191,14 +193,14 @@ for ($iDep=0; $iDep<scalar(@dep); $iDep++) {
   my $dd = $dep[$iDep];
   $D = uc ($dd);
   $d = lc ($dd);
-  $PKG_DOCDEPS = $PKG_DOCDEPS."\@$D\_DOCDIR\@/html/$dd.doxytag=\@$D\_DOCDIR\@/html ";
+  $PKG_DOCDEPS = $PKG_DOCDEPS."\@$D\_DOXYGENDOCDIR\@/$dd.doxytag=\@$D\_DOXYGENDOCDIR\@ ";
 }
 
 for ($iDep=0; $iDep<scalar(@docdep); $iDep++) {
   my $dd = $docdep[$iDep];
   $D = uc ($dd);
   $d = lc ($dd);
-  $PKG_DOCDEPS = $PKG_DOCDEPS."\@$D\_DOCDIR\@/html/$dd.doxytag=\@$D\_DOCDIR\@/html ";
+  $PKG_DOCDEPS = $PKG_DOCDEPS."\@$D\_DOXYGENDOCDIR\@/$dd.doxytag=\@$D\_DOXYGENDOCDIR\@ ";
 }
 
 # Generate PKG_DEPS_CFLAGS
