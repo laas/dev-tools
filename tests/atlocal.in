@@ -19,4 +19,4 @@
 
 
 # Add test binaries to PATH.
-PATH=@abs_builddir@:$PATH
+PATH=@abs_top_builddir@:$PATH

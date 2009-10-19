@@ -1,7 +1,7 @@
 #! /bin/sh
 
 echo "Generate package..."
-packageCreate -p testpkg
+packageCreate-local -p testpkg
 cd testpkg
 echo "Bootstrap..."
 ./bootstrap

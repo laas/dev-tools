@@ -17,7 +17,7 @@ COMMON_SOURCES = common.hh
 check_PROGRAMS = simple-test
 simple_test_SOURCES = simple-test.cc $(COMMON_SOURCES)
 simple_test_LDADD = $(top_builddir)/src/lib@PACKAGE_TARNAME@.la
-simple_test_la_CPPFLAGS = &PKG_DEPS_CFLAGS&
+simple_test_la_CPPFLAGS = $(AM_CPPFLAGS) &PKG_DEPS_CFLAGS&
 
 .PHONY: generate-reference
 

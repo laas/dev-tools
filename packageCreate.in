@@ -114,6 +114,18 @@ if (-d $package_lc) {
 #####################
 # Generate package. #
 #####################
+
+if (! -d "$tplProjectDir") {
+    print
+	"$tplProjectDir does not exist.\n".
+	"Please re-install the software or use the PACKAGECREATE_SHAREDIR\n".
+	"environment variable to set the location of this directory.\n".
+	"A directory called template-project must exist in ".
+	"PACKAGECREATE_SHAREDIR if used.\n";
+    exit 1;
+}
+
+
 # Copy template into specified location.
 system("cp -Rf $tplProjectDir $package_lc");
 

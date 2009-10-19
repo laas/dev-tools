@@ -8,7 +8,7 @@ SUBDIRS = 		\
 
 
 # Provide bootstrap with the generated package.
-EXTRA_DIST += bootstrap template-project
+EXTRA_DIST += bootstrap template-project packageCreate-local
 
 # (Un)Install template-project.
 tplprojectdir="@prefix@/share/@PACKAGE_TARNAME@"
