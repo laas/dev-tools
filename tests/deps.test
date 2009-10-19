@@ -19,3 +19,6 @@ packageCreate-local -p titi -d tata -dd toto
 initPkg toto
 initPkg tata
 initPkg titi
+
+# TODO: make Titi::Titi derive from Tata::Tata to make
+# sure generated packages have correct dependencies.
