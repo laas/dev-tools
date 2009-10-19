@@ -1,0 +1,21 @@
+#! /bin/sh
+
+function initPkg ()
+{
+   cd "$1"
+   echo "Bootstrap..."
+   ./bootstrap
+   echo "Configure..."
+   ./configure
+   echo "Distcheck..."
+   make distcheck
+}
+
+echo "Generate packages..."
+packageCreate-local -p toto
+packageCreate-local -p tata -dd toto
+packageCreate-local -p titi -d tata -dd toto
+
+initPkg toto
+initPkg tata
+initPkg titi

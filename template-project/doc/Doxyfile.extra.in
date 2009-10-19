@@ -8,3 +8,5 @@ INPUT                  = @abs_top_srcdir@/include \
 
 HTML_HEADER            = @abs_top_srcdir@/doc/header.html
 HTML_FOOTER            = @abs_top_srcdir@/doc/footer.html
+
+TAGFILES               = &PKG_DOCDEPS&

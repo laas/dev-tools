@@ -31,4 +31,9 @@ AT_SETUP([Simple])
 AT_CHECK([simple.test], [0], [ignore], [ignore])
 AT_CLEANUP
 
+AT_SETUP([Dependencies])
+AT_CHECK([deps.test], [0], [ignore], [ignore])
+AT_CLEANUP
+
+
 # End of testsuite.at
