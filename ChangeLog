@@ -1,3 +1,9 @@
+2009-10-25  Florent Lamiraux  <florent@laas.fr>
+
+	Fix typo in tests/Makefile.am.
+	* template-project/tests/Makefile.am: Replace wrong
+	simple_test_la_CPPFLAGS by simple_test_CPPFLAGS.
+
 2009-05-27  Florent Lamiraux  <florent@laas.fr>
 
 	Regenereate .pc file if Makefile has changed.
