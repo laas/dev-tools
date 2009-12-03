@@ -11,7 +11,7 @@ SUBDIRS = 		\
 
 
 # Provide bootstrap with the generated package.
-EXTRA_DIST += bootstrap deps.ac
+EXTRA_DIST += bootstrap deps.ac build-aux/bootstrap
 
 # Nothing to do in this directory.
 all:

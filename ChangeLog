@@ -1,3 +1,8 @@
+2009-12-03  Thomas Moulard  <thomas.moulard@gmail.com>
+
+	Distribute build-aux/bootstrap.
+	* template-project/Makefile.am: Here.
+
 2009-10-25  Florent Lamiraux  <florent@laas.fr>
 
 	Fix typo in tests/Makefile.am.
