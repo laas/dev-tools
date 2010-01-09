@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
 from __future__ import with_statement
-import sys, os
-import re
 from optparse import OptionParser
-
+import commands
+import re
+import sys, os
 
 pkgConfigPath = os.environ.get("PKG_CONFIG_PATH")
 pathList = re.split(':', pkgConfigPath)
@@ -33,13 +33,13 @@ def extractDep(inPkg):
 
     packageSet.add(inPkg)
     depSet = set()
-    
+
     """Loop over directories in PKG_CONFIG_PATH """
-    
+
     for path in pathList:
         found = False
         filePc = path+"/"+inPkg+".pc"
-        
+
         try:
             with open(filePc) as f:
                 for line in f:
@@ -63,6 +63,28 @@ def extractDep(inPkg):
         print "extracting ", dep
         extractDep(dep)
 
+
+def getDocLink(package):
+    cmd = "pkg-config --variable=doxygendocdir " + package
+    status,output = commands.getstatusoutput(cmd)
+
+    if status != 0:
+        return ''
+
+    if output != '':
+        return output
+
+    cmd = "pkg-config --variable=docdir " + package
+    status,output = commands.getstatusoutput(cmd)
+
+    if status != 0:
+        return ''
+
+    if output != '':
+        return output + '/html'
+    return output
+
+
 for pkg in packageList:
     extractDep(pkg)
 
@@ -82,7 +104,10 @@ f.write("\tcompound=true\n")
 f.write("\n")
 
 for package in packageSet:
-    f.write("\t\"" + package + "\" [shape = box]\n")
+    docLink = getDocLink(package)
+    if docLink != '':
+        docLink = docLink + '/main.html'
+    f.write("\t\"" + package + "\" [shape = box, href = \"" + docLink + "\"]\n")
 
 
 for dependency in dependencySet:
