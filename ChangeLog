@@ -1,3 +1,12 @@
+2010-04-12  Thomas Moulard  <thomas.moulard@gmail.com>
+
+	Fix generation when project name contains hyphens.
+	Patch proposed by Duong Dang.
+
+	* .gitignore: Ignore packageDep.
+	* ChangeLog: Remove whitespace.
+	* packageCreate.in: Fix project name.
+
 2009-12-03  Thomas Moulard  <thomas.moulard@gmail.com>
 
 	Distribute build-aux/bootstrap.
@@ -15,7 +24,7 @@
 
 	This ensures that the .pc file is regenerated if configure has been
 	invoked.
-	* template-project/Makefile.am: 
+	* template-project/Makefile.am:
 
 2009-05-25  Florent Lamiraux  <florent@laas.fr>
 
@@ -31,24 +40,24 @@
 2009-05-08  Florent Lamiraux  <florent@laas.fr>
 
 	Add linking flags in src/Makefile.am.
-	* packageCreate: 
-	* template-project/src/Makefile.am: 
+	* packageCreate:
+	* template-project/src/Makefile.am:
 
 2009-05-01  Florent Lamiraux  <florent@laas.fr>
 
 	Enhance package construction.
-	* template-project/configure.ac: 
+	* template-project/configure.ac:
 	Check that doxygen is installed,
 	search for mkdir and sed
 	* template-project/doc/Makefile.am: .
-	replace MKDIR_P by mkdir_p for better portability 
+	replace MKDIR_P by mkdir_p for better portability
 
 2009/04/23
 	14. packageDep can display several packages in one output.
 
 2009/04/22
 	13. Add packageDep script to generate graphs of dependencies between packages.
-	
+
 	12. --version now outputs correct value.
 
 PackageCreate version 1.1.0 released April 7, 2009
@@ -59,27 +68,36 @@ PackageCreate version 1.1.0 released April 7, 2009
             and substituted.
           2. better use of autotools.
 
+2009/04/23
+	12. packageDep can display several packages in one output.
+
+2009/04/22
+	11. Add packageDep script to generate graphs of dependencies between packages.
+
+2009/01/28
+	10. packageCreate now generates packages managed by cmake.
+
 2008/05/19
 	9. Remove obsolete doxygen directives.
-	
+
 2008/04/18
 
 	8. In src/package.cpp, debug message are filtered out by compilation option -DDEBUG=1 or 2.
 	7. Added output to explain how to use the package
-	
+
 2008/04/16
 	6. Added commands in configure.ac to set CXXFLAGS and CFLAGS env variables to -Wall if not already defined.
 2008/03/04
 	5. Modification of the style file in order better highlight detailled descriptions.
-	
+
 2007/12/21
 	4. Correction in compilation of dist rule.
-	
+
 2007/11/15
 	3. Added autogen.sh file.
-	
+
 2007/04/20
-	packageCreate: 
+	packageCreate:
 	1. Modified Makefile.am in order to compile doc only at installation
 	2. Added generation of package.doxytag in order to make doxygen find documentation of dependencies.
-	
+

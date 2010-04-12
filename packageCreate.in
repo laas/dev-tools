@@ -86,6 +86,7 @@ sub usage {
 my $package_lc = lc ($pkg);
 # Upper case.
 my $package_uc = uc ($pkg);
+$package_uc =~ s/\W/_/g;
 # Caml case.
 my $package_cc = ucfirst ($package_lc);
 
@@ -136,7 +137,9 @@ open(OUTPUT, ">"."$package_lc/deps.ac") or
 my ($iDep, $D, $d);
 for ($iDep = 0; $iDep< scalar(@dep); $iDep++) {
     $D = uc ($dep[$iDep]);
+    $D =~ s/\W/_/g;
     $d = lc ($dep[$iDep]);
+    $d =~ s/\W//g;
 
     print OUTPUT  "m4_define([$d"."_reqd], [$dep[$iDep] >= 0.1])\n";
     print OUTPUT  "AC_SUBST([$D"."_REQD], [\"$d"."_reqd\"])\n";
@@ -155,7 +158,12 @@ for ($iDep = 0; $iDep< scalar(@dep); $iDep++) {
 
 for ($iDep = 0; $iDep< scalar(@docdep); $iDep++) {
     $D = uc ($docdep[$iDep]);
+    $D =~ s/\W/_/g;
+
     $d = lc ($docdep[$iDep]);
+    $d =~ s/\W//g;
+
+
     print OUTPUT  "PKG_CHECK_MODULES([$D], [$docdep[$iDep]])\n";
     print OUTPUT  "$D\_PREFIX=\`\$PKG_CONFIG $docdep[$iDep] --variable=prefix\`\n";
     print OUTPUT  "$D\_DOCDIR=\`\$PKG_CONFIG $docdep[$iDep] --variable=docdir\`\n";
@@ -167,7 +175,11 @@ for ($iDep = 0; $iDep< scalar(@docdep); $iDep++) {
 print OUTPUT  "AC_SUBST([PKGCONFIG_REQUIRES], [\"";
 for ($iDep = 0; $iDep< scalar(@dep); $iDep++) {
     $D = uc ($dep[$iDep]);
+    $D =~ s/\W/_/g;
     $d = lc ($dep[$iDep]);
+    $d =~ s/\W//g;
+
+
     print OUTPUT  "$d"."_reqd";
     if ($iDep < scalar(@dep)-1) {
 	print OUTPUT ", ";
@@ -192,14 +204,19 @@ my $PKG_DEPS_LIBS = "";
 for ($iDep=0; $iDep<scalar(@dep); $iDep++) {
   my $dd = $dep[$iDep];
   $D = uc ($dd);
+  $D =~ s/\W/_/g;
   $d = lc ($dd);
+  $d =~ s/\W//g;
   $PKG_DOCDEPS = $PKG_DOCDEPS."\@$D\_DOXYGENDOCDIR\@/$dd.doxytag=\@$D\_DOXYGENDOCDIR\@ ";
 }
 
 for ($iDep=0; $iDep<scalar(@docdep); $iDep++) {
   my $dd = $docdep[$iDep];
   $D = uc ($dd);
+  $D =~ s/\W/_/g;
+
   $d = lc ($dd);
+  $d =~ s/\W//g;
   $PKG_DOCDEPS = $PKG_DOCDEPS."\@$D\_DOXYGENDOCDIR\@/$dd.doxytag=\@$D\_DOXYGENDOCDIR\@ ";
 }
 
@@ -207,6 +224,7 @@ for ($iDep=0; $iDep<scalar(@docdep); $iDep++) {
 for ($iDep=0; $iDep<scalar(@dep); $iDep++) {
   my $dd = $dep[$iDep];
   $D = uc ($dd);
+  $D =~ s/\W/_/g;
   $PKG_DEPS_CFLAGS = $PKG_DEPS_CFLAGS."\$($D\_CFLAGS) ";
 }
 
@@ -214,9 +232,9 @@ for ($iDep=0; $iDep<scalar(@dep); $iDep++) {
 for ($iDep=0; $iDep<scalar(@dep); $iDep++) {
   my $dd = $dep[$iDep];
   $D = uc ($dd);
+  $D =~ s/\W/_/g;
   $PKG_DEPS_LIBS = $PKG_DEPS_LIBS."\$($D\_LIBS) ";
 }
-
 
 my $sed_args = "-e 's,&PACKAGE_TARNAME&,$package_lc,g' \\
                 -e 's,&PACKAGE_TARNAME_LC&,$package_lc,g' \\
@@ -232,8 +250,18 @@ my $sed_args = "-e 's,&PACKAGE_TARNAME&,$package_lc,g' \\
                 -e 's,&EMAIL&,$EMAIL,g' \\
                 -e 's,&DATE&,$DATE,g'";
 
+
 # Tune files.
 system("find $package_lc -type f -print0 | xargs -0 sed -i $sed_args \n");
+# Tune Makefile.am 
+my $package_lc_alphanum = $package_lc;
+$package_lc_alphanum =~ s/\W/_/g;
+my $sed_args = "-e 's,${package_lc}_la_SOURCES,${package_lc_alphanum}_la_SOURCES,g' \\
+                -e 's,${package_lc}_la_LIBADD,${package_lc_alphanum}_la_LIBADD,g' \\
+                -e 's,${package_lc}_la_CPPFLAGS,${package_lc_alphanum}_la_CPPFLAGS,g' \\
+                ";
+
+system("find $package_lc -type f -name Makefile.am -print0 | xargs -0 sed -i $sed_args \n");
 
 # Move sample C++ source/header file.
 system("mv $package_lc/src/package.cc $package_lc/src/$package_lc.cc");
