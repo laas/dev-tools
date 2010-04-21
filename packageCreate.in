@@ -256,10 +256,10 @@ system("find $package_lc -type f -print0 | xargs -0 sed -i $sed_args \n");
 # Tune Makefile.am 
 my $package_lc_alphanum = $package_lc;
 $package_lc_alphanum =~ s/\W/_/g;
-my $sed_args = "-e 's,${package_lc}_la_SOURCES,${package_lc_alphanum}_la_SOURCES,g' \\
-                -e 's,${package_lc}_la_LIBADD,${package_lc_alphanum}_la_LIBADD,g' \\
-                -e 's,${package_lc}_la_CPPFLAGS,${package_lc_alphanum}_la_CPPFLAGS,g' \\
-                ";
+$sed_args = "-e 's,${package_lc}_la_SOURCES,${package_lc_alphanum}_la_SOURCES,g' \\
+             -e 's,${package_lc}_la_LIBADD,${package_lc_alphanum}_la_LIBADD,g' \\
+             -e 's,${package_lc}_la_CPPFLAGS,${package_lc_alphanum}_la_CPPFLAGS,g' \\
+            ";
 
 system("find $package_lc -type f -name Makefile.am -print0 | xargs -0 sed -i $sed_args \n");
 

@@ -1,5 +1,10 @@
 2010-04-21  Thomas Moulard  <thomas.moulard@gmail.com>
 
+	Fix perl warning in packageCreate.in.
+	* packageCreate.in: Avoid redefining a variable.
+
+2010-04-21  Thomas Moulard  <thomas.moulard@gmail.com>
+
 	Fix project name in documentation footer.
 	* template-project/doc/footer.html: Here.
 
