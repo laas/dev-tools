@@ -1,3 +1,8 @@
+2010-04-21  Thomas Moulard  <thomas.moulard@gmail.com>
+
+	Fix project name in documentation footer.
+	* template-project/doc/footer.html: Here.
+
 2010-04-12  Thomas Moulard  <thomas.moulard@gmail.com>
 
 	Fix generation when project name contains hyphens.
