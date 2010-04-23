@@ -1,5 +1,10 @@
 2010-04-23  Thomas Moulard  <thomas.moulard@gmail.com>
 
+	Synchronize.
+	* template-project/build-aux: Synchronize with build-aux submodule.
+
+2010-04-23  Thomas Moulard  <thomas.moulard@gmail.com>
+
 	Remove semi-colon when closing namespaces.
 	* template-project/include/package/package.hh,
 	* template-project/src/package.cc: Removing semi-colon.
