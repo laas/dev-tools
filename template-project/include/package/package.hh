@@ -39,6 +39,6 @@ namespace &PACKAGE_TARNAME_CC&
     //FIXME: more here.
   };
 
-}; // end of namespace &PACKAGE_TARNAME_CC&.
+} // end of namespace &PACKAGE_TARNAME_CC&.
 
 #endif //! &PACKAGE_TARNAME_UC&_&PACKAGE_TARNAME_UC&_HH_

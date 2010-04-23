@@ -34,4 +34,4 @@ namespace &PACKAGE_TARNAME_CC&
   {
   }
 
-}; // end of namespace &PACKAGE_TARNAME_CC&.
+} // end of namespace &PACKAGE_TARNAME_CC&.
