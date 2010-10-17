@@ -151,7 +151,7 @@ if ($kind ne "autotools") {
 open(OUTPUT, ">"."$package_lc/".$dep_file) or
   die "Cannot open output file $package_lc/".$dep_file."\n";
 
-print OUTPUT "# Automatically generated - DO NOT EDIT!\n"
+print OUTPUT "# Automatically generated - DO NOT EDIT!\n";
 
 my ($iDep, $D, $d);
 for ($iDep = 0; $iDep< scalar(@dep); $iDep++) {

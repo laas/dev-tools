@@ -7,3 +7,4 @@ autom4te.cache/
 testsuite
 package-dep
 INSTALL
+.version

@@ -1,6 +1,6 @@
 #! /bin/sh
 
-function initPkg ()
+initPkg()
 {
    cd "$1"
    echo "Bootstrap..."
