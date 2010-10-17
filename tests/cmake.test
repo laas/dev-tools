@@ -3,9 +3,7 @@
 echo "Generate package..."
 package-create-local --kind cmake -p testpkg
 cd testpkg
-echo "Bootstrap..."
-./bootstrap
-echo "Configure..."
+echo "cmake..."
 cmake .
 echo "Make..."
 make
