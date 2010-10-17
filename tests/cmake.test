@@ -6,6 +6,8 @@ cd testpkg
 echo "Bootstrap..."
 ./bootstrap
 echo "Configure..."
-./configure
-echo "Distcheck..."
-make distcheck
+cmake .
+echo "Make..."
+make
+echo "Make test..."
+make test
