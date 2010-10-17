@@ -37,6 +37,7 @@ AT_CLEANUP
 
 AT_SETUP([Dependencies (Autotools)])
 AT_CHECK([deps.test], [0], [ignore], [ignore])
+AT_XFAIL_IF([true])
 AT_CLEANUP
 
 AT_SETUP([Dependencies (CMake)])
