@@ -141,6 +141,10 @@ if (! -d "$tplProjectDir") {
 # Copy template into specified location.
 system("cp -Rf $tplProjectDir $package_lc");
 
+# Fix permissions.
+system("find $package_lc -type d -print0 | xargs -0 chmod 755");
+system("find $package_lc -type f -print0 | xargs -0 chmod u+rw,g+rw,o+r");
+
 # Generate dependency file.
 my $dep_file = "deps.ac";
 
