@@ -6,7 +6,7 @@ AC_PREREQ([2.63])
 ## Package configuration ##
 ## --------------------- ##
 AC_INIT([&PACKAGE_NAME&],
-	[0.1],
+	[m4_esyscmd(build-aux/git-version-gen .tarball-version)],
 	[&EMAIL&],
 	[&PACKAGE_TARNAME&])
 
