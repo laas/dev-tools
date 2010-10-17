@@ -49,4 +49,6 @@ CLEANFILES += atconfig
 
 # Distribute reference files.
 EXTRA_DIST +=						\
-	simple.test
+	autotools.test					\
+	cmake.test					\
+	deps.test
