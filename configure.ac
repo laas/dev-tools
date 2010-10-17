@@ -11,10 +11,10 @@ AC_INIT([dev-tools],
 	[dev-tools])
 
 # Auxiliary files.
-AC_CONFIG_AUX_DIR([template-project/build-aux])
+AC_CONFIG_AUX_DIR([template-project/autotools/build-aux])
 
 # Macros are stored in build-aux.
-AC_CONFIG_MACRO_DIR([template-project/build-aux])
+AC_CONFIG_MACRO_DIR([template-project/autotools/build-aux])
 
 # Automake.
 AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 -Wall nostdinc])
