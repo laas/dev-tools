@@ -1,4 +1,4 @@
-# Copyright (C) 2009 by &FULLNAME&.                                    -*-Autotest-*-
+# Copyright (C) 2009 by &FULLNAME&.                               -*-Autotest-*-
 #
 # This file is part of the &PACKAGE_TARNAME&.
 #
@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with &PACKAGE_TARNAME&.  If not, see <http://www.gnu.org/licenses/>.
 
+m4_include([autotest.at])
+
 ## ----------------------- ##
 ## Launch the test suite.  ##
 ## ----------------------- ##
@@ -25,5 +27,4 @@ AT_COPYRIGHT(
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.])
 
-# Class mechanism test.
-m4_include([simple-test.at])
+CHECK_STDOUT_KINEO([simple-test], [Empty test generated automatically.])
