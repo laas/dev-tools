@@ -167,7 +167,7 @@ for ($iDep = 0; $iDep< scalar(@dep); $iDep++) {
     if ($kind eq "autotools") {
 	print OUTPUT "JRL_PKGCONFIGCHECK([$D], [$dep[$iDep] >= 0.1])\n"
     } else {
-	print OUTPUT "FIXME\n"
+	print OUTPUT "ADD_REQUIRED_DEPENDENCY($dep[$iDep] >= 0.1)\n"
     }
 }
 
