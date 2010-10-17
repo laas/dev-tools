@@ -31,7 +31,7 @@ if (defined($ENV{PACKAGECREATE_SHAREDIR})) {
 } else {
     $tplProjectDir = "@prefix@/share/@PACKAGE_TARNAME@";
 }
-$tplProjectDir = $tplProjectDir."/template-project";
+$tplProjectDir = $tplProjectDir."/template-project/autotools";
 
 
 #######################
