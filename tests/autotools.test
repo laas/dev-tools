@@ -1,11 +1,11 @@
 #! /bin/sh
 
 echo "Generate package..."
-package-create-local -p testpkg
-cd testpkg
+package-create-local -p testpkg || exit 2
+cd testpkg || exit 2
 echo "Bootstrap..."
-./bootstrap
+./bootstrap || exit 2
 echo "Configure..."
-./configure
+./configure || exit 2
 echo "Distcheck..."
-make distcheck
+make distcheck || exit 2

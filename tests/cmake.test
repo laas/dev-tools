@@ -1,11 +1,11 @@
 #! /bin/sh
 
 echo "Generate package..."
-package-create-local --kind cmake -p testpkg
-cd testpkg
+package-create-local --kind cmake -p testpkg || exit 2
+cd testpkg || exit 2
 echo "cmake..."
-cmake .
+cmake . || exit 2
 echo "Make..."
-make
+make || exit 2
 echo "Make test..."
-make test
+make test || exit 2
