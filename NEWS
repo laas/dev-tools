@@ -1,4 +1,6 @@
                                                                 -*- outline -*-
 
-New in X.Y, XXXX-YY-ZZ:
-* FIXME.
+New in 0.1, 2010-10-17:
+* Initial release.
+* Add package-create with support for both Autotools and CMake.
+* Add package-dep which produces a dot graph for pkg-config information.
