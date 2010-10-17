@@ -24,3 +24,5 @@ uninstall-local:
 
 # Distribute shell scripts.
 bin_SCRIPTS = package-create package-dep
+
+include $(top_srcdir)/build-aux/git-version-gen.mk

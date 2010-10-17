@@ -23,7 +23,7 @@ AC_PREREQ([2.63])
 ## Package configuration ##
 ## --------------------- ##
 AC_INIT([dev-tools],
-	[1.1],
+	[m4_esyscmd(build-aux/git-version-gen .tarball-version)],
 	[hpp@laas.fr],
 	[dev-tools])
 
