@@ -1,3 +1,20 @@
+# Copyright (C) 2010 by Florent Lamiraux, Thomas Moulard, CNRS.
+#
+# This file is part of the dev-tools.
+#
+# dev-tools is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# dev-tools is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with dev-tools. If not, see <http://www.gnu.org/licenses/>.
+
 # Don't expend macros beginning by JRL_.
 m4_pattern_forbid([^JRL_])
 AC_PREREQ([2.63])
