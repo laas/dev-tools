@@ -23,17 +23,6 @@ use Getopt::Long;
 use FindBin qw($Bin);
 use Env qw(EMAIL FULLNAME);
 
-# Search for the template-project directory.
-my $tplProjectDir = "";
-
-if (defined($ENV{PACKAGECREATE_SHAREDIR})) {
-    $tplProjectDir = $ENV{PACKAGECREATE_SHAREDIR};
-} else {
-    $tplProjectDir = "@prefix@/share/@PACKAGE_TARNAME@";
-}
-$tplProjectDir = $tplProjectDir."/template-project/autotools";
-
-
 #######################
 # Parse command line. #
 #######################
@@ -41,10 +30,12 @@ $tplProjectDir = $tplProjectDir."/template-project/autotools";
 my ($pkg, $print_version, $print_help, @dep, @docdep);
 my $usage = "package-create -p <packageName> -d dependency -dd docDependency";
 my $version = "@PACKAGE_VERSION@";
+my $kind = "autotools";
 
 usage() if !GetOptions("version|v"   => \$print_version,
                        "help|h"      => \$print_help,
                        "package|p=s" => \$pkg,
+                       "kind|k=s" => \$kind,
                        "dep|d:s"     => \@dep,
                        "docdep|dd:s"  => \@docdep);
 
@@ -55,15 +46,21 @@ if ($print_version) {
 
 if ($print_help) {
     print "$usage\n
-  Generate an Autotools package and provides basic support for testing with Autotest
-  and Doxygen documentation.
+  Generate an Autotools package and provides basic support
+  for testing with Autotest and Doxygen documentation.
 
   --dep|-d dependency
      Define a compilation dependency from this package to another.
 
   --docdep|-dd docDependency
      Define a documentation dependency from this package to another.
-     Documentation dependencies are handled by Doxygen to track class inheritance between packages.
+     Documentation dependencies are handled by Doxygen to track
+     class inheritance between packages.
+
+  --kind <kind>
+     Set the kind of package that will be generated.
+     It can be either autotools or cmake.
+     Default value is autotools.
 
   --version|-v
      print version information.
@@ -96,6 +93,7 @@ my $package_cc = ucfirst ($package_lc);
 # Various checks. #
 ###################
 if (!$pkg) { print $usage . "\n"; exit 1 }
+if ($kind ne "autotools" && $kind ne "cmake") { print $usage . "\n"; exit 1 }
 
 if (!$FULLNAME) {
     print "Please specify your name in the FULLNAME environment variable.\n";
@@ -111,6 +109,18 @@ if (-d $package_lc) {
     print "The directory already exists, please remove it first if necessary.\n";
     exit 1;
 }
+
+##############################################
+# Search for the template-project directory. #
+##############################################
+my $tplProjectDir = "";
+
+if (defined($ENV{PACKAGECREATE_SHAREDIR})) {
+    $tplProjectDir = $ENV{PACKAGECREATE_SHAREDIR};
+} else {
+    $tplProjectDir = "@prefix@/share/@PACKAGE_TARNAME@";
+}
+$tplProjectDir = $tplProjectDir."/template-project/".$kind;
 
 
 #####################
@@ -131,9 +141,15 @@ if (! -d "$tplProjectDir") {
 # Copy template into specified location.
 system("cp -Rf $tplProjectDir $package_lc");
 
-# Generate deps.ac
-open(OUTPUT, ">"."$package_lc/deps.ac") or
-  die "Cannot open output file $package_lc/deps.ac \n";
+# Generate dependency file.
+my $dep_file = "deps.ac";
+
+if ($kind ne "autotools") {
+    $dep_file = "deps.cmake"
+}
+
+open(OUTPUT, ">"."$package_lc/".$dep_file) or
+  die "Cannot open output file $package_lc/".$dep_file."\n";
 
 my ($iDep, $D, $d);
 for ($iDep = 0; $iDep< scalar(@dep); $iDep++) {
@@ -142,19 +158,11 @@ for ($iDep = 0; $iDep< scalar(@dep); $iDep++) {
     $d = lc ($dep[$iDep]);
     $d =~ s/\W//g;
 
-    print OUTPUT  "m4_define([$d"."_reqd], [$dep[$iDep] >= 0.1])\n";
-    print OUTPUT  "AC_SUBST([$D"."_REQD], [\"$d"."_reqd\"])\n";
-    print OUTPUT  "PKG_CHECK_MODULES([$D], [$d"."_reqd])\n";
-    print OUTPUT  "$D\_PREFIX=\`\$PKG_CONFIG $dep[$iDep] --variable=prefix\`\n";
-    print OUTPUT  "$D\_DOCDIR=\`\$PKG_CONFIG $dep[$iDep] --variable=docdir\`\n";
-    print OUTPUT  "$D\_DOXYGENDOCDIR=\`\$PKG_CONFIG $dep[$iDep] --variable=doxygendocdir\`\n";
-    print OUTPUT  "AC_SUBST([$D\_CFLAGS])\n";
-    print OUTPUT  "AC_SUBST([$D\_LIBS])\n";
-    print OUTPUT  "AC_SUBST([$D\_PREFIX])\n";
-    print OUTPUT  "AC_SUBST([$D\_DOCDIR])\n";
-    print OUTPUT  "AC_SUBST([$D\_DOXYGENDOCDIR])\n";
-    print OUTPUT  "\n";
-
+    if ($kind eq "autotools") {
+	print OUTPUT "JRL_PKGCONFIGCHECK([$D], [$dep[$iDep] >= 0.1])\n"
+    } else {
+	print OUTPUT "FIXME\n"
+    }
 }
 
 for ($iDep = 0; $iDep< scalar(@docdep); $iDep++) {
@@ -172,26 +180,18 @@ for ($iDep = 0; $iDep< scalar(@docdep); $iDep++) {
     print OUTPUT  "AC_SUBST([$D\_DOCDIR])\n";
     print OUTPUT  "\n";
 }
-
-print OUTPUT  "AC_SUBST([PKGCONFIG_REQUIRES], [\"";
-for ($iDep = 0; $iDep< scalar(@dep); $iDep++) {
-    $D = uc ($dep[$iDep]);
-    $D =~ s/\W/_/g;
-    $d = lc ($dep[$iDep]);
-    $d =~ s/\W//g;
-
-
-    print OUTPUT  "$d"."_reqd";
-    if ($iDep < scalar(@dep)-1) {
-	print OUTPUT ", ";
-    }
-}
-print OUTPUT  "\"])\n";
-
 close(OUTPUT);
 
 # Generate sed arguments.
-my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime(time);
+my ($sec,
+    $min,
+    $hour,
+    $mday,
+    $mon,
+    $year,
+    $wday,
+    $yday,
+    $isdst) = localtime(time);
 $year += 1900;
 $mon += 1;
 
@@ -208,7 +208,8 @@ for ($iDep=0; $iDep<scalar(@dep); $iDep++) {
   $D =~ s/\W/_/g;
   $d = lc ($dd);
   $d =~ s/\W//g;
-  $PKG_DOCDEPS = $PKG_DOCDEPS."\@$D\_DOXYGENDOCDIR\@/$dd.doxytag=\@$D\_DOXYGENDOCDIR\@ ";
+  $PKG_DOCDEPS =
+      $PKG_DOCDEPS."\@$D\_DOXYGENDOCDIR\@/$dd.doxytag=\@$D\_DOXYGENDOCDIR\@ ";
 }
 
 for ($iDep=0; $iDep<scalar(@docdep); $iDep++) {
@@ -218,7 +219,8 @@ for ($iDep=0; $iDep<scalar(@docdep); $iDep++) {
 
   $d = lc ($dd);
   $d =~ s/\W//g;
-  $PKG_DOCDEPS = $PKG_DOCDEPS."\@$D\_DOXYGENDOCDIR\@/$dd.doxytag=\@$D\_DOXYGENDOCDIR\@ ";
+  $PKG_DOCDEPS =
+      $PKG_DOCDEPS."\@$D\_DOXYGENDOCDIR\@/$dd.doxytag=\@$D\_DOXYGENDOCDIR\@ ";
 }
 
 # Generate PKG_DEPS_CFLAGS
@@ -254,15 +256,17 @@ my $sed_args = "-e 's,&PACKAGE_TARNAME&,$package_lc,g' \\
 
 # Tune files.
 system("find $package_lc -type f -print0 | xargs -0 sed -i $sed_args \n");
-# Tune Makefile.am 
+# Tune Makefile.am
 my $package_lc_alphanum = $package_lc;
 $package_lc_alphanum =~ s/\W/_/g;
-$sed_args = "-e 's,${package_lc}_la_SOURCES,${package_lc_alphanum}_la_SOURCES,g' \\
-             -e 's,${package_lc}_la_LIBADD,${package_lc_alphanum}_la_LIBADD,g' \\
-             -e 's,${package_lc}_la_CPPFLAGS,${package_lc_alphanum}_la_CPPFLAGS,g' \\
-            ";
+$sed_args =
+    "-e 's,${package_lc}_la_SOURCES,${package_lc_alphanum}_la_SOURCES,g' \\
+     -e 's,${package_lc}_la_LIBADD,${package_lc_alphanum}_la_LIBADD,g' \\
+     -e 's,${package_lc}_la_CPPFLAGS,${package_lc_alphanum}_la_CPPFLAGS,g' \\
+    ";
 
-system("find $package_lc -type f -name Makefile.am -print0 | xargs -0 sed -i $sed_args \n");
+system("find $package_lc -type f -name Makefile.am -print0 ".
+       " | xargs -0 sed -i $sed_args \n");
 
 # Move sample C++ source/header file.
 system("mv $package_lc/src/package.cc $package_lc/src/$package_lc.cc");
@@ -277,19 +281,34 @@ print "cd $pkg\n";
 print "./bootstrap\n";
 print "mkdir _build\n";
 print "cd _build\n";
-print "../configure --prefix=... CXXFLAGS=\"-g -DDEBUG=2\"\n";
+
+if ($kind eq "autotools") {
+    print "../configure --prefix=... CXXFLAGS=\"-g\"\n";
+} else {
+    print "cmake -DCMAKE_INSTALL_PREFIX=... ..\n";
+}
+
 print "make\n";
 print "\n";
 print "If you want...\n";
-print "* to get a tarball (to distribute the package): make distcheck\n";
-print "* to generate the doc: make doc\n";
-print "* to align the testsuite to current outputs: \n";
-print "    cd _build/tests && make generate-reference\n";
-print "Please make sure to generate the stdout files with the previous\n";
-print "command line *before* trying a make distcheck.\n";
-print "\n";
-print "See Autotools documentation for more information:\n";
-print "* Autoconf: http://www.gnu.org/software/autoconf/manual/\n";
-print "* Automake: http://www.gnu.org/software/automake/manual/\n";
-print "* Libtool: http://www.gnu.org/software/libtool/manual/\n";
+
+if ($kind eq "autotools") {
+    print "* to get a tarball (to distribute the package): make distcheck\n";
+    print "* to generate the doc: make doc\n";
+    print "* to align the testsuite to current outputs: \n";
+    print "    cd _build/tests && make generate-reference\n";
+    print "Please make sure to generate the stdout files with the previous\n";
+    print "command line *before* trying a make distcheck.\n";
+    print "\n";
+    print "See Autotools documentation for more information:\n";
+    print "* Autoconf: http://www.gnu.org/software/autoconf/manual/\n";
+    print "* Automake: http://www.gnu.org/software/automake/manual/\n";
+    print "* Libtool: http://www.gnu.org/software/libtool/manual/\n";
+} else {
+    print "* to get a tarball (to distribute the package): make dist\n";
+    print "* to generate the doc: make doc\n";
+    print "\n";
+    print "See CMake documentation for more information:\n";
+    print "* CMake: http://www.cmake.org/cmake/help/documentation.html\n";
+}
 exit;
