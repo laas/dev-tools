@@ -15,14 +15,17 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with &PACKAGE_TARNAME&.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "common.hh"
+#include <&PACKAGE_TARNAME&/&PACKAGE_TARNAME&.hh>
 
-int run_test ();
+#define BOOST_TEST_MODULE simple
 
-int run_test ()
+#include <boost/test/unit_test.hpp>
+#include <boost/test/output_test_stream.hpp>
+
+using boost::test_tools::output_test_stream;
+
+BOOST_AUTO_TEST_CASE (simple)
 {
-  //FIXME: make a real test.
-  return 0;
+  // FIXME: replace by a real test!
+  BOOST_CHECK_EQUAL (1 + 1, 2);
 }
-
-GENERATE_TEST ()
