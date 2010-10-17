@@ -1,0 +1,11 @@
+#! /bin/sh
+
+echo "Generate package..."
+package-create-local --kind cmake -p testpkg
+cd testpkg
+echo "Bootstrap..."
+./bootstrap
+echo "Configure..."
+./configure
+echo "Distcheck..."
+make distcheck
