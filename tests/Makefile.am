@@ -1,4 +1,4 @@
-include $(top_srcdir)/template-project/build-aux/init.mk
+include $(top_srcdir)/template-project/autotools/build-aux/init.mk
 
 # Define how autom4te is called to generate the testsuite file.
 AUTOTEST = $(AUTOM4TE) --language=autotest -Wall
@@ -28,7 +28,8 @@ clean-local:
 
 $(TESTSUITE): $(PACKAGE_M4_IN) $(srcdir)/testsuite.at \
 	      $(top_srcdir)/configure
-	$(AUTOTEST) -I'$(srcdir)' -I'$(top_srcdir)/template-project/build-aux' \
+	$(AUTOTEST) -I'$(srcdir)' \
+        -I'$(top_srcdir)/template-project/autotools/build-aux' \
 	-I'$(top_builddir)/tests' $@.at -o $@.tmp
 	mv $@.tmp $@
 

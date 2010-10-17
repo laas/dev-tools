@@ -1,7 +1,7 @@
-include $(top_srcdir)/template-project/build-aux/init.mk
+include $(top_srcdir)/template-project/autotools/build-aux/init.mk
 
 # Search for autoconf macros in build-aux.
-ACLOCAL_AMFLAGS = -I template-project/build-aux
+ACLOCAL_AMFLAGS = -I template-project/autotools/build-aux
 
 SUBDIRS = 		\
 	tests
