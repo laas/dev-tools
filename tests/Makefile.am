@@ -51,4 +51,5 @@ CLEANFILES += atconfig
 EXTRA_DIST +=						\
 	autotools.test					\
 	cmake.test					\
-	deps.test
+	deps.test					\
+	deps-cmake.test

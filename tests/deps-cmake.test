@@ -1,0 +1,24 @@
+#! /bin/sh
+
+initPkg()
+{
+   cd "$1" || exit 2
+   echo "cmake..."
+   cmake . || exit 2
+   echo "Make..."
+   make || exit 2
+   echo "Make test..."
+   make test || exit 2
+}
+
+echo "Generate packages..."
+package-create-local --kind cmake -p toto || exit 2
+package-create-local --kind cmake -p tata -dd toto || exit 2
+package-create-local --kind cmake -p titi -d tata -dd toto || exit 2
+
+initPkg toto
+initPkg tata
+initPkg titi
+
+# TODO: make Titi::Titi derive from Tata::Tata to make
+# sure generated packages have correct dependencies.
