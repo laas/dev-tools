@@ -12,13 +12,13 @@ ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK -DBOOST_TEST_MAIN)
 # This macro will create a binary from `NAME.cc', link it against
 # Boost and add it to the test suite.
 #
-MACRO(JRL_MATHTOOLS_TEST NAME)
+MACRO(ADD_TESTCASE NAME)
   ADD_EXECUTABLE(${NAME} ${NAME}.cc)
   ADD_TEST(${NAME} ${RUNTIME_OUTPUT_DIRECTORY}/${NAME})
 
   # Link against Boost.
   TARGET_LINK_LIBRARIES(${NAME} ${Boost_LIBRARIES})
-ENDMACRO(JRL_MATHTOOLS_TEST)
+ENDMACRO(ADD_TESTCASE)
 
 # Generated test.
 ADD_TESTCASE(simple)
