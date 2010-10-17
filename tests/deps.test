@@ -1,24 +1,43 @@
 #! /bin/sh
 
+tmp=`mktemp -d` || abort "cannot create the temporary directory"
+trap "rm -rf -- '$tmp'" EXIT
+
+export PKG_CONFIG_PATH=$tmp
+
+abort()
+{
+    echo "$1"
+    exit 2
+}
+
 initPkg()
 {
-   cd "$1" || exit 2
+   cd "$1" || abort "failed to change directory"
    echo "Bootstrap..."
-   ./bootstrap || exit 2
+   ./bootstrap || abort "failed to bootstrap"
    echo "Configure..."
-   ./configure || exit 2
+   ./configure --prefix=$tmp || abort "failed to configure"
+   echo "Make..."
+   make install || abort "failed to compile"
+   echo "Make install..."
+   make install || abort "failed to install"
    echo "Distcheck..."
-   make distcheck || exit 2
+   make distcheck || abort "failed to distcheck"
+   cd ..
 }
 
 echo "Generate packages..."
-package-create-local -p toto || exit 2
-package-create-local -p tata -dd toto || exit 2
-package-create-local -p titi -d tata -dd toto || exit 2
+package-create-local -p toto || abort "failed to generate toto"
+package-create-local -p tata -dd toto || abort "failed to generate tata"
+package-create-local -p titi -d tata -dd toto || abort "failed to generate titi"
 
+echo "Build packages..."
 initPkg toto
 initPkg tata
 initPkg titi
+
+trap - EXIT
 
 # TODO: make Titi::Titi derive from Tata::Tata to make
 # sure generated packages have correct dependencies.
