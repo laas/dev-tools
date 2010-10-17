@@ -8,4 +8,4 @@ if test -d ".git"; then
     git submodule update
 fi
 
-exec template-project/build-aux/bootstrap
+exec template-project/autotools/build-aux/bootstrap
