@@ -1,3 +1,7 @@
-[submodule "template-project/build-aux"]
-	path = template-project/build-aux
+[submodule "template-project/autotools/build-aux"]
+	path = template-project/autotools/build-aux
 	url = git://github.com/laas/shared-build-aux.git
+
+[submodule "template-project/cmake/cmake"]
+	path = template-project/cmake/cmake
+	url = git://github.com/jrl-umi3218/jrl-cmakemodules.git
