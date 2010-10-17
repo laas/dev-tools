@@ -6,8 +6,8 @@
 #
 # This scripts allows automatic generation of packages.
 # It is a perl script. To use it:
-# $ chmod u+x packageCreate
-# $ cd /tmp && /path/to/packageCreate -p foo
+# $ chmod u+x package-create
+# $ cd /tmp && /path/to/package-create -p foo
 #
 # It will create a package in /tmp/foo.
 
@@ -38,7 +38,7 @@ $tplProjectDir = $tplProjectDir."/template-project";
 #######################
 
 my ($pkg, $print_version, $print_help, @dep, @docdep);
-my $usage = "packageCreate -p <packageName> -d dependency -dd docDependency";
+my $usage = "package-create -p <packageName> -d dependency -dd docDependency";
 my $version = "@PACKAGE_VERSION@";
 
 usage() if !GetOptions("version|v"   => \$print_version,
@@ -48,7 +48,7 @@ usage() if !GetOptions("version|v"   => \$print_version,
                        "docdep|dd:s"  => \@docdep);
 
 if ($print_version) {
-    print "packageCreate version $version\n";
+    print "package-create version $version\n";
     exit;
 }
 

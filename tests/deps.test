@@ -12,9 +12,9 @@ function initPkg ()
 }
 
 echo "Generate packages..."
-packageCreate-local -p toto
-packageCreate-local -p tata -dd toto
-packageCreate-local -p titi -d tata -dd toto
+package-create-local -p toto
+package-create-local -p tata -dd toto
+package-create-local -p titi -d tata -dd toto
 
 initPkg toto
 initPkg tata

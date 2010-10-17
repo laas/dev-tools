@@ -1,10 +1,10 @@
 #! /bin/sh
 # This script should *not* be installed. It is only made for developpers
-# that want to test locally packageCreate without running
+# that want to test locally package-create without running
 # ``make install'' first.
 # It defines automagically the PACKAGECREATE_SHAREDIR environment varaible
-# so that packageCreate will find the template-project directory even
+# so that package-create will find the template-project directory even
 # if no installation has been done on the local computer.
 set -e
 export PACKAGECREATE_SHAREDIR="@abs_top_srcdir@"
-exec @abs_top_builddir@/packageCreate "$@"
+exec @abs_top_builddir@/package-create "$@"

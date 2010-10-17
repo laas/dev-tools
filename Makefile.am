@@ -23,4 +23,4 @@ uninstall-local:
 	rm -rf "$(DESTDIR)$(tplprojectdir)"
 
 # Distribute shell scripts.
-bin_SCRIPTS = packageCreate packageDep
+bin_SCRIPTS = package-create package-dep

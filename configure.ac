@@ -5,10 +5,10 @@ AC_PREREQ([2.63])
 ## --------------------- ##
 ## Package configuration ##
 ## --------------------- ##
-AC_INIT([Packaging tools],
+AC_INIT([dev-tools],
 	[1.1],
 	[hpp@laas.fr],
-	[package-tools])
+	[dev-tools])
 
 # Auxiliary files.
 AC_CONFIG_AUX_DIR([template-project/build-aux])
@@ -49,8 +49,8 @@ AC_CONFIG_FILES([
 
 # Generate shell scripts.
 AC_CONFIG_FILES(
-	[packageCreate packageCreate-local packageDep],
-	[chmod +x packageCreate packageCreate-local packageDep])
+	[package-create package-create-local package-dep],
+	[chmod +x package-create package-create-local package-dep])
 
 # Write files.
 AC_OUTPUT
