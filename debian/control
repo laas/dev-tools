@@ -1,7 +1,7 @@
 Source: dev-tools
 Priority: extra
 Maintainer: Thomas Moulard <thomas.moulard@gmail.com>
-Build-Depends: debhelper (>= 7.0.50~)
+Build-Depends: debhelper (>= 7.0.50~),
 	       perl (>= 5.10.1)
 Standards-Version: 3.8.4
 Vcs-Git: git://github.com/laas/dev-tools.git
