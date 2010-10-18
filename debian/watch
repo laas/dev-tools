@@ -5,5 +5,4 @@
 
 version=3
 
-http://githubredir.debian.net/github/laas/dev-tools
-
+http://githubredir.debian.net/github/laas/dev-tools (.*).tar.gz
