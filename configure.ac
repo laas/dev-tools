@@ -34,7 +34,7 @@ AC_CONFIG_AUX_DIR([template-project/autotools/build-aux])
 AC_CONFIG_MACRO_DIR([template-project/autotools/build-aux])
 
 # Automake.
-AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 -Wall nostdinc])
+AM_INIT_AUTOMAKE([1.9.6 dist-bzip2 -Wall nostdinc foreign])
 
 ## ------------------- ##
 ## Additionnal tools.  ##

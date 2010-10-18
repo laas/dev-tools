@@ -4,3 +4,6 @@
 [submodule "template-project/cmake/cmake"]
 	path = template-project/cmake/cmake
 	url = git://github.com/jrl-umi3218/jrl-cmakemodules.git
+[submodule "build-aux"]
+	path = build-aux
+	url = git://github.com/laas/shared-build-aux.git
