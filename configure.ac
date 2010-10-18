@@ -65,9 +65,9 @@ AC_CONFIG_FILES([
 ])
 
 # Generate shell scripts.
-AC_CONFIG_FILES(
-	[package-create package-create-local package-dep],
-	[chmod +x package-create package-create-local package-dep])
+AC_CONFIG_FILES([package-create], [chmod +x package-create])
+AC_CONFIG_FILES([package-create-local], [chmod +x package-create-local])
+AC_CONFIG_FILES([package-dep], [chmod +x package-dep])
 
 # Write files.
 AC_OUTPUT
