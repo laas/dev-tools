@@ -10,7 +10,7 @@ Section: devel
 Homepage: http://github.com/laas/dev-tools
 
 Package: dev-tools
-Architecture: any
+Architecture: all
 Depends: perl (>= 5.10.1), ${shlibs:Depends}, ${misc:Depends}
 Description: Useful tools for development at LAAS and JRL
  The dev-tools package provides useful tools such as package-create
