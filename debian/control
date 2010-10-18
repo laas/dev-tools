@@ -2,7 +2,8 @@ Source: dev-tools
 Priority: extra
 Maintainer: Thomas Moulard <thomas.moulard@gmail.com>
 Build-Depends: debhelper (>= 7.0.50~),
-	       perl (>= 5.10.1)
+	       perl (>= 5.10.1),
+	       python (>= 2.6.5)
 Standards-Version: 3.8.4
 Vcs-Git: git://github.com/laas/dev-tools.git
 Vcs-browser: http://github.com/laas/dev-tools
@@ -11,7 +12,7 @@ Homepage: http://github.com/laas/dev-tools
 
 Package: dev-tools
 Architecture: all
-Depends: perl (>= 5.10.1), ${shlibs:Depends}, ${misc:Depends}
+Depends: perl (>= 5.10.1), python (>= 2.6.5), ${shlibs:Depends}, ${misc:Depends}
 Description: Useful tools for development at LAAS and JRL
  The dev-tools package provides useful tools such as package-create
  and package-dep.
