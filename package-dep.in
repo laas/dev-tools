@@ -53,7 +53,7 @@ def extractDep(inPkg):
                             if dep:
                                 depName = dep.group(0)
                                 depSet.add(depName)
-                                depString = "\"" + depName + "\" -> \"" + inPkg + "\""
+                                depString = "\"" + inPkg + "\" -> \"" + depName + "\""
                                 dependencySet.add(depString)
 
         except IOError, ex:
