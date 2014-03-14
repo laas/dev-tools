@@ -7,6 +7,8 @@ from optparse import OptionParser
 
 
 pkgConfigPath = os.environ.get("PKG_CONFIG_PATH")
+if pkgConfigPath is None:
+    pkgConfigPath = ''
 pathList = re.split(':', pkgConfigPath)
 
 usage = "usage: %prog [options] package-1 ... package-n"
